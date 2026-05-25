@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sculpture — Façonné dans la lumière</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --cream: #e8dcc8;
+      --bg: #080808;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--cream);
+      font-family: Georgia, 'Times New Roman', serif;
+      overflow-x: hidden;
+    }
+
+    /* Loading overlay */
+    #loading {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+      transition: opacity 0.9s ease;
+    }
+    #loading.hidden {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loader-ring {
+      width: 40px;
+      height: 40px;
+      border: 1.5px solid rgba(232, 220, 200, 0.12);
+      border-top-color: rgba(232, 220, 200, 0.65);
+      border-radius: 50%;
+      animation: spin 1.2s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* Hero — 400vh gives a full 360° rotation across the scroll */
+    #hero {
+      height: 400vh;
+      position: relative;
+    }
+
+    /* Sticky viewport stays at top while user scrolls through hero */
+    #sticky {
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      width: 100%;
+      overflow: hidden;
+    }
+
+    /* Canvas fills the entire sticky viewport */
+    #three-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+    }
+
+    /* Right-side gradient so text stays legible over the model */
+    #sticky::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      right: 0;
+      width: 50%;
+      height: 100%;
+      background: linear-gradient(
+        to left,
+        rgba(8, 8, 8, 0.8) 0%,
+        rgba(8, 8, 8, 0.25) 55%,
+        transparent 100%
+      );
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* Text panel — right side, vertically centered */
+    #text-panel {
+      position: absolute;
+      right: 8%;
+      top: 50%;
+      transform: translateY(-50%);
+      width: min(300px, 28vw);
+      height: 9rem;
+      z-index: 2;
+      pointer-events: none;
+    }
+
+    /* All face texts stack in the panel; only .active is visible */
+    .face-text {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      justify-content: center;
+      gap: 0.65rem;
+      opacity: 0;
+      transition: opacity 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    .face-text.active {
+      opacity: 1;
+    }
+
+    .face-text .label {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: rgba(232, 220, 200, 0.35);
+    }
+
+    .face-text h2 {
+      font-size: clamp(1.05rem, 1.65vw, 1.5rem);
+      font-weight: 300;
+      font-style: italic;
+      line-height: 1.55;
+      letter-spacing: 0.02em;
+      color: var(--cream);
+      text-align: right;
+    }
+
+    /* Scroll hint */
+    #scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.6rem;
+      z-index: 2;
+      pointer-events: none;
+      transition: opacity 0.6s ease;
+    }
+    #scroll-hint.gone {
+      opacity: 0;
+    }
+    #scroll-hint span {
+      font-size: 0.58rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(232, 220, 200, 0.32);
+    }
+    .scroll-line {
+      width: 1px;
+      height: 36px;
+      background: linear-gradient(to bottom, rgba(232, 220, 200, 0.5), transparent);
+      animation: breathe 2s ease-in-out infinite;
+    }
+    @keyframes breathe {
+      0%, 100% { opacity: 0.2;  transform: scaleY(0.8); }
+      50%       { opacity: 0.9; transform: scaleY(1); }
+    }
+
+    /* ─── Mobile ≤ 1023px ─────────────────────────────── */
+    @media (max-width: 1023px) {
+      #hero {
+        height: auto;
+      }
+      #sticky {
+        position: relative;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        padding: 3.5rem 1.5rem 4.5rem;
+        gap: 2.5rem;
+        overflow: visible;
+      }
+      #sticky::after {
+        display: none;
+      }
+      #three-canvas {
+        position: relative;
+        inset: auto;
+        width: 100%;
+        height: min(80vw, 440px);
+        flex-shrink: 0;
+      }
+      #text-panel {
+        position: static;
+        transform: none;
+        width: 100%;
+        height: auto;
+        display: flex;
+        flex-direction: column;
+        gap: 0;
+      }
+      .face-text {
+        position: static;
+        opacity: 1 !important;
+        align-items: center;
+        padding: 1.3rem 0;
+        border-bottom: 1px solid rgba(232, 220, 200, 0.07);
+      }
+      .face-text:last-child {
+        border-bottom: none;
+      }
+      .face-text h2 {
+        text-align: center;
+        font-size: clamp(0.9rem, 3.5vw, 1.15rem);
+      }
+      .face-text .label {
+        display: none;
+      }
+      #scroll-hint {
+        display: none;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="loading"><div class="loader-ring"></div></div>
+
+  <section id="hero">
+    <div id="sticky">
+      <canvas id="three-canvas"></canvas>
+
+      <div id="text-panel">
+        <div class="face-text active" data-face="0">
+          <span class="label">I</span>
+          <h2>Façonné dans&nbsp;la&nbsp;lumière</h2>
+        </div>
+        <div class="face-text" data-face="1">
+          <span class="label">II</span>
+          <h2>Chaque détail raconte une&nbsp;histoire</h2>
+        </div>
+        <div class="face-text" data-face="2">
+          <span class="label">III</span>
+          <h2>L'art prend vie entre vos&nbsp;mains</h2>
+        </div>
+        <div class="face-text" data-face="3">
+          <span class="label">IV</span>
+          <h2>Une&nbsp;oeuvre, une&nbsp;émotion</h2>
+        </div>
+      </div>
+
+      <div id="scroll-hint">
+        <span>Défiler</span>
+        <div class="scroll-line"></div>
+      </div>
+    </div>
+  </section>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
+      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+    }
+  }
+  </script>
+
+  <script type="module">
+    import * as THREE from 'three';
+    import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
+    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+    const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
+
+    /* ── Renderer ──────────────────────────────────────── */
+    const canvas = document.getElementById('three-canvas');
+
+    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.outputColorSpace      = THREE.SRGBColorSpace;
+    renderer.toneMapping           = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure   = 1.25;
+
+    /* ── Scene ─────────────────────────────────────────── */
+    const scene = new THREE.Scene();
+
+    // Environment map — gives subtle ambient reflections to the material
+    const pmrem = new THREE.PMREMGenerator(renderer);
+    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+    pmrem.dispose();
+
+    /* ── Camera ────────────────────────────────────────── */
+    const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
+    camera.position.set(0, 0, 3.5);
+
+    /* ── Lighting ──────────────────────────────────────── */
+    // Soft ambient fill
+    scene.add(new THREE.AmbientLight(0xfff4e6, 0.3));
+
+    // Key light — front, slightly above-right
+    const key = new THREE.DirectionalLight(0xffeed8, 2.8);
+    key.position.set(2, 3, 4);
+    scene.add(key);
+
+    // Fill light — cooler, left side
+    const fill = new THREE.DirectionalLight(0xdce8ff, 0.5);
+    fill.position.set(-3, 0.5, 2);
+    scene.add(fill);
+
+    // Rim light — behind model, gives silhouette depth
+    const rim = new THREE.DirectionalLight(0xaabbdd, 1.3);
+    rim.position.set(-1.5, 2, -4);
+    scene.add(rim);
+
+    /* ── Load GLB ──────────────────────────────────────── */
+    let model = null;
+    const loadingEl = document.getElementById('loading');
+
+    function onModelReady() {
+      loadingEl.classList.add('hidden');
+    }
+
+    new GLTFLoader().load(
+      './angel_bust.glb',
+      (gltf) => {
+        model = gltf.scene;
+
+        // Normalize size and center at origin
+        const box    = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size   = box.getSize(new THREE.Vector3());
+        const scale  = 1.8 / Math.max(size.x, size.y, size.z);
+
+        model.scale.setScalar(scale);
+        model.position.set(
+          -center.x * scale + (IS_DESKTOP ? -0.22 : 0),
+          -center.y * scale,
+          -center.z * scale
+        );
+
+        scene.add(model);
+        onModelReady();
+      },
+      undefined,
+      (err) => {
+        // Fallback placeholder when GLB is absent
+        console.warn('GLB not found — showing placeholder:', err.message);
+        const geo = new THREE.TorusKnotGeometry(0.55, 0.18, 160, 32);
+        const mat = new THREE.MeshStandardMaterial({
+          color: 0xc4a06a,
+          metalness: 0.15,
+          roughness: 0.55,
+        });
+        model = new THREE.Mesh(geo, mat);
+        scene.add(model);
+        onModelReady();
+      }
+    );
+
+    /* ── Scroll → rotation ─────────────────────────────── */
+    let targetY  = 0;
+    let currentY = 0;
+    const LERP   = 0.07; // smoothing factor (~60fps)
+
+    function onScroll() {
+      const hero = document.getElementById('hero');
+      const raw  = window.scrollY - hero.offsetTop;
+      const max  = hero.offsetHeight - window.innerHeight;
+      const p    = Math.max(0, Math.min(1, raw / max));
+
+      targetY = p * Math.PI * 2; // 0 → full 360°
+
+      document.getElementById('scroll-hint')
+        .classList.toggle('gone', p > 0.015);
+    }
+
+    if (IS_DESKTOP) {
+      window.addEventListener('scroll', onScroll, { passive: true });
+    }
+
+    /* ── Face text switching ───────────────────────────── */
+    const faceEls  = document.querySelectorAll('.face-text');
+    let activeFace = 0;
+
+    function getFace(ry) {
+      const d = (((ry * 180 / Math.PI) % 360) + 360) % 360;
+      // 0° ±45° → face 0, 90° ±45° → face 1, etc.
+      if (d < 45 || d >= 315) return 0;
+      if (d < 135) return 1;
+      if (d < 225) return 2;
+      return 3;
+    }
+
+    function setFace(f) {
+      if (f === activeFace) return;
+      activeFace = f;
+      faceEls.forEach((el, i) => el.classList.toggle('active', i === f));
+    }
+
+    /* ── Resize ────────────────────────────────────────── */
+    function resize() {
+      const rect = canvas.getBoundingClientRect();
+      const w = Math.round(rect.width);
+      const h = Math.round(rect.height);
+      if (!w || !h) return;
+      renderer.setSize(w, h, false);
+      camera.aspect = w / h;
+      camera.updateProjectionMatrix();
+    }
+
+    new ResizeObserver(resize).observe(canvas);
+    resize();
+
+    /* ── Render loop ───────────────────────────────────── */
+    function animate() {
+      requestAnimationFrame(animate);
+
+      if (IS_DESKTOP) {
+        currentY += (targetY - currentY) * LERP;
+      }
+
+      if (model) {
+        model.rotation.y = currentY;
+        if (IS_DESKTOP) setFace(getFace(currentY));
+      }
+
+      renderer.render(scene, camera);
+    }
+
+    animate();
+  </script>
+</body>
+</html>
