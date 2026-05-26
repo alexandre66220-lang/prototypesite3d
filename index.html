@@ -3,68 +3,257 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sculpture — Façonné dans la lumière</title>
+  <title>AURÉA — Joaillerie d'exception</title>
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
+
+  <!-- Three.js r128 via CDN (UMD global) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <!-- GLTFLoader r128 — attaches THREE.GLTFLoader -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+    /* ============================================================
+       RESET & VARIABLES
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --cream: #e8dcc8;
-      --bg: #080808;
+      --noir:     #080808;
+      --noir-2:   #0f0f0f;
+      --gris:     #1a1a1a;
+      --or:       #C9A84C;
+      --or-clair: #E8C96A;
+      --creme:    #FAF8F2;
+      --ease:     cubic-bezier(0.4, 0, 0.2, 1);
     }
 
+    html { scroll-behavior: auto; }
+
     body {
-      background: var(--bg);
-      color: var(--cream);
-      font-family: Georgia, 'Times New Roman', serif;
+      background: var(--noir);
+      color: var(--creme);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
       overflow-x: hidden;
     }
 
-    /* Loading overlay */
-    #loading {
+    /* ============================================================
+       PRELOADER
+    ============================================================ */
+    #preloader {
       position: fixed;
       inset: 0;
-      background: var(--bg);
+      z-index: 9999;
+      background: var(--noir);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 2rem;
+      transition: opacity 0.9s var(--ease), visibility 0.9s;
+    }
+    #preloader.hidden { opacity: 0; visibility: hidden; pointer-events: none; }
+
+    .pre-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      letter-spacing: 0.6em;
+      color: var(--or);
+      font-weight: 300;
+    }
+    .pre-status {
+      font-size: 0.6rem;
+      letter-spacing: 0.3em;
+      color: rgba(201,168,76,0.45);
+      text-transform: uppercase;
+    }
+    .pre-bar-track {
+      width: 200px;
+      height: 1px;
+      background: rgba(201,168,76,0.12);
+      overflow: hidden;
+    }
+    #pre-bar {
+      height: 100%;
+      width: 0%;
+      background: linear-gradient(90deg, var(--or), var(--or-clair));
+      transition: width 0.25s ease;
+    }
+
+    /* ============================================================
+       NAVBAR
+    ============================================================ */
+    #navbar {
+      position: fixed;
+      inset: 0 0 auto 0;
       z-index: 1000;
-      transition: opacity 0.9s ease;
+      height: 72px;
+      padding: 0 4vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: transparent;
+      border-bottom: 1px solid transparent;
+      transition: background 0.5s var(--ease), border-color 0.5s;
     }
-    #loading.hidden {
-      opacity: 0;
-      pointer-events: none;
+    #navbar.scrolled {
+      background: var(--noir);
+      border-bottom-color: rgba(201,168,76,0.22);
     }
-    .loader-ring {
-      width: 40px;
-      height: 40px;
-      border: 1.5px solid rgba(232, 220, 200, 0.12);
-      border-top-color: rgba(232, 220, 200, 0.65);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* Hero — 400vh gives a full 360° rotation across the scroll */
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 2.8rem;
+    }
+    .nav-links a {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(250,248,242,0.55);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover { color: var(--or-clair); }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.5em;
+      color: var(--or);
+      font-weight: 300;
+      text-decoration: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @media (max-width: 767px) {
+      .nav-links { display: none; }
+      .nav-logo  { position: static; transform: none; }
+      #navbar    { justify-content: center; }
+    }
+
+    /* ============================================================
+       SECTION 1 — HERO
+    ============================================================ */
     #hero {
-      height: 400vh;
       position: relative;
-    }
-
-    /* Sticky viewport stays at top while user scrolls through hero */
-    #sticky {
-      position: sticky;
-      top: 0;
-      height: 100vh;
       width: 100%;
+      height: 100vh;
       overflow: hidden;
     }
 
-    /* Canvas fills the entire sticky viewport */
-    #three-canvas {
+    /* Image placeholder */
+    #hero-bg {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(155deg, #111 0%, var(--gris) 55%, #090909 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.8rem;
+      transition: opacity 0.7s var(--ease);
+    }
+    #hero-bg.fade-out { opacity: 0; pointer-events: none; }
+
+    .hero-wordmark {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(3.5rem, 11vw, 9rem);
+      letter-spacing: 0.5em;
+      color: var(--or);
+      font-weight: 300;
+      line-height: 1;
+    }
+    .hero-baseline {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.95rem, 2.2vw, 1.45rem);
+      color: rgba(250,248,242,0.55);
+      letter-spacing: 0.08em;
+    }
+
+    /* Scroll hint */
+    #scroll-cue {
+      position: absolute;
+      bottom: 2.8rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.7rem;
+      pointer-events: none;
+      z-index: 2;
+    }
+    #scroll-cue span {
+      font-size: 0.52rem;
+      letter-spacing: 0.32em;
+      text-transform: uppercase;
+      color: rgba(201,168,76,0.55);
+    }
+    .cue-line {
+      width: 1px;
+      height: 38px;
+      background: linear-gradient(to bottom, var(--or), transparent);
+      transform-origin: top;
+      animation: cuePulse 2s ease-in-out infinite;
+    }
+    @keyframes cuePulse {
+      0%   { transform: scaleY(0.1); opacity: 0; }
+      40%  { transform: scaleY(1);   opacity: 1; }
+      100% { transform: scaleY(1);   opacity: 0; }
+    }
+
+    /* Canvas hero (overlay lors de la transition) */
+    #hero-canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      display: block;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.6s var(--ease);
+    }
+
+    /* ============================================================
+       SECTION 2 — SCROLL-DRIVEN 3D
+    ============================================================ */
+    #section-3d {
+      position: relative;
+      height: 500vh;
+    }
+
+    .sticky-stage {
+      position: sticky;
+      top: 0;
+      width: 100%;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Gradient fond derrière les textes à droite */
+    .sticky-stage::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 48%;
+      height: 100%;
+      background: linear-gradient(to left,
+        rgba(8,8,8,0.82) 0%,
+        rgba(8,8,8,0.28) 55%,
+        transparent 100%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    #main-canvas {
       position: absolute;
       inset: 0;
       width: 100%;
@@ -72,366 +261,871 @@
       display: block;
     }
 
-    /* Right-side gradient so text stays legible over the model */
-    #sticky::after {
-      content: '';
-      position: absolute;
-      top: 0;
-      right: 0;
-      width: 50%;
-      height: 100%;
-      background: linear-gradient(
-        to left,
-        rgba(8, 8, 8, 0.8) 0%,
-        rgba(8, 8, 8, 0.25) 55%,
-        transparent 100%
-      );
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    /* Text panel — right side, vertically centered */
-    #text-panel {
-      position: absolute;
-      right: 8%;
-      top: 50%;
-      transform: translateY(-50%);
-      width: min(300px, 28vw);
-      height: 9rem;
-      z-index: 2;
-      pointer-events: none;
-    }
-
-    /* All face texts stack in the panel; only .active is visible */
-    .face-text {
+    /* Messages */
+    .msg-layer {
       position: absolute;
       inset: 0;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      justify-content: center;
-      gap: 0.65rem;
-      opacity: 0;
-      transition: opacity 0.75s cubic-bezier(0.4, 0, 0.2, 1);
-    }
-    .face-text.active {
-      opacity: 1;
-    }
-
-    .face-text .label {
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
-      text-transform: uppercase;
-      color: rgba(232, 220, 200, 0.35);
-    }
-
-    .face-text h2 {
-      font-size: clamp(1.05rem, 1.65vw, 1.5rem);
-      font-weight: 300;
-      font-style: italic;
-      line-height: 1.55;
-      letter-spacing: 0.02em;
-      color: var(--cream);
-      text-align: right;
-    }
-
-    /* Scroll hint */
-    #scroll-hint {
-      position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 0.6rem;
-      z-index: 2;
       pointer-events: none;
-      transition: opacity 0.6s ease;
-    }
-    #scroll-hint.gone {
-      opacity: 0;
-    }
-    #scroll-hint span {
-      font-size: 0.58rem;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: rgba(232, 220, 200, 0.32);
-    }
-    .scroll-line {
-      width: 1px;
-      height: 36px;
-      background: linear-gradient(to bottom, rgba(232, 220, 200, 0.5), transparent);
-      animation: breathe 2s ease-in-out infinite;
-    }
-    @keyframes breathe {
-      0%, 100% { opacity: 0.2;  transform: scaleY(0.8); }
-      50%       { opacity: 0.9; transform: scaleY(1); }
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6vw;
     }
 
-    /* ─── Mobile ≤ 1023px ─────────────────────────────── */
-    @media (max-width: 1023px) {
-      #hero {
-        height: auto;
-      }
-      #sticky {
-        position: relative;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 3.5rem 1.5rem 4.5rem;
-        gap: 2.5rem;
-        overflow: visible;
-      }
-      #sticky::after {
-        display: none;
-      }
-      #three-canvas {
-        position: relative;
-        inset: auto;
-        width: 100%;
-        height: min(80vw, 440px);
-        flex-shrink: 0;
-      }
-      #text-panel {
-        position: static;
-        transform: none;
-        width: 100%;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-      }
-      .face-text {
-        position: static;
-        opacity: 1 !important;
-        align-items: center;
-        padding: 1.3rem 0;
-        border-bottom: 1px solid rgba(232, 220, 200, 0.07);
-      }
-      .face-text:last-child {
-        border-bottom: none;
-      }
-      .face-text h2 {
-        text-align: center;
-        font-size: clamp(0.9rem, 3.5vw, 1.15rem);
-      }
-      .face-text .label {
-        display: none;
-      }
-      #scroll-hint {
-        display: none;
-      }
+    .msg-step {
+      position: absolute;
+      right: 6vw;
+      max-width: min(360px, 36vw);
+      text-align: right;
+      opacity: 0;
+      transform: translateY(18px);
+      transition: opacity 0.65s var(--ease), transform 0.65s var(--ease);
     }
+    .msg-step.active {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    .msg-surtitre {
+      font-size: 0.58rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 1rem;
+    }
+    .msg-titre {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.7rem, 3.2vw, 2.8rem);
+      font-weight: 300;
+      line-height: 1.18;
+      color: var(--creme);
+      margin-bottom: 1.1rem;
+    }
+    .msg-corps {
+      font-size: 0.73rem;
+      font-weight: 300;
+      line-height: 1.95;
+      color: rgba(250,248,242,0.5);
+      letter-spacing: 0.03em;
+    }
+    .msg-cta {
+      display: inline-block;
+      margin-top: 1.8rem;
+      padding: 0.7rem 2rem;
+      border: 1px solid var(--or);
+      color: var(--or);
+      font-size: 0.6rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      text-decoration: none;
+      pointer-events: auto;
+      font-family: 'Montserrat', sans-serif;
+      transition: background 0.3s, color 0.3s;
+    }
+    .msg-cta:hover { background: var(--or); color: var(--noir); }
+
+    /* Mobile */
+    @media (max-width: 767px) {
+      .sticky-stage::after { display: none; }
+      .msg-step {
+        right: 0; left: 0;
+        max-width: 100%;
+        bottom: 2rem; top: auto;
+        text-align: center;
+        padding: 0 1.5rem;
+      }
+      .msg-layer { align-items: flex-end; padding: 0; }
+    }
+
+    /* ============================================================
+       SECTION 3 — COLLECTION
+    ============================================================ */
+    #collection {
+      background: var(--noir);
+      padding: 8rem 4vw 8rem;
+      text-align: center;
+    }
+
+    .sec-eyebrow {
+      display: block;
+      font-size: 0.58rem;
+      letter-spacing: 0.35em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 1.2rem;
+    }
+    .sec-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 4vw, 3.2rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.7rem;
+    }
+    .sec-sub {
+      font-size: 0.72rem;
+      letter-spacing: 0.12em;
+      color: rgba(250,248,242,0.38);
+      margin-bottom: 4rem;
+    }
+
+    .cards-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 1.5rem;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    @media (max-width: 860px) {
+      .cards-row { grid-template-columns: 1fr; max-width: 380px; }
+    }
+
+    .card {
+      border: 1px solid transparent;
+      cursor: pointer;
+      transition: transform 0.4s var(--ease), border-color 0.4s, box-shadow 0.4s;
+    }
+    .card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(201,168,76,0.38);
+      box-shadow: 0 24px 60px rgba(201,168,76,0.07);
+    }
+
+    .card-thumb {
+      width: 100%;
+      aspect-ratio: 3/4;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .card-1 .card-thumb { background: linear-gradient(145deg, #2a1e00, #6a4b00, #3c2b00); }
+    .card-2 .card-thumb { background: linear-gradient(145deg, #0c191f, #193040, #091520); }
+    .card-3 .card-thumb { background: linear-gradient(145deg, #1e0a08, #3c1510, #290c08); }
+
+    /* Ornement géométrique dans la vignette */
+    .card-thumb::before,
+    .card-thumb::after {
+      content: '';
+      position: absolute;
+      border: 1px solid rgba(201,168,76,0.25);
+      transform: rotate(45deg);
+    }
+    .card-thumb::before { width: 56px; height: 56px; }
+    .card-thumb::after  { width: 36px; height: 36px; border-color: rgba(201,168,76,0.12); }
+
+    .card-body {
+      background: var(--gris);
+      padding: 1.5rem 1.4rem;
+      text-align: left;
+    }
+    .card-name {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.25rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.4rem;
+    }
+    .card-mat {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 0.9rem;
+    }
+    .card-prix {
+      font-size: 0.65rem;
+      letter-spacing: 0.14em;
+      color: rgba(250,248,242,0.3);
+      text-transform: uppercase;
+    }
+
+    /* Fade-in au scroll */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(36px);
+      transition: opacity 0.8s var(--ease), transform 0.8s var(--ease);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+    .fade-up:nth-child(2) { transition-delay: 0.14s; }
+    .fade-up:nth-child(3) { transition-delay: 0.28s; }
+
+    /* ============================================================
+       SECTION 4 — SAVOIR-FAIRE
+    ============================================================ */
+    #savoir-faire {
+      background: var(--noir-2);
+      padding: 8rem 4vw;
+      text-align: center;
+    }
+
+    .sf-cols {
+      display: grid;
+      grid-template-columns: 1fr 1px 1fr 1px 1fr;
+      max-width: 980px;
+      margin: 4rem auto 0;
+      align-items: start;
+    }
+    @media (max-width: 767px) {
+      .sf-cols { grid-template-columns: 1fr; gap: 3rem; }
+      .sf-sep  { display: none; }
+    }
+
+    .sf-sep {
+      background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.3), transparent);
+      height: 150px;
+      align-self: center;
+    }
+
+    .sf-col { padding: 0 2.5rem; }
+
+    .sf-icon {
+      width: 44px; height: 44px;
+      margin: 0 auto 1.6rem;
+    }
+    .sf-col-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.3rem;
+      font-weight: 400;
+      letter-spacing: 0.04em;
+      margin-bottom: 1rem;
+    }
+    .sf-col-text {
+      font-size: 0.72rem;
+      line-height: 1.95;
+      color: rgba(250,248,242,0.42);
+      letter-spacing: 0.03em;
+    }
+
+    /* Slide-up au scroll */
+    .slide-up {
+      opacity: 0;
+      transform: translateY(28px);
+      transition: opacity 0.7s var(--ease), transform 0.7s var(--ease);
+    }
+    .slide-up.visible { opacity: 1; transform: translateY(0); }
+    .slide-up:nth-child(3) { transition-delay: 0.15s; }
+    .slide-up:nth-child(5) { transition-delay: 0.30s; }
+
+    /* ============================================================
+       SECTION 5 — CTA
+    ============================================================ */
+    #cta {
+      background: linear-gradient(155deg, var(--noir) 0%, var(--gris) 50%, var(--noir) 100%);
+      padding: 9rem 4vw;
+      text-align: center;
+    }
+
+    .cta-rule {
+      width: 70px;
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--or), transparent);
+      margin: 0 auto 3rem;
+    }
+    .cta-stars {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 1.4rem;
+      margin-bottom: 3rem;
+      opacity: 0.42;
+    }
+    .cta-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2.2rem, 5vw, 4rem);
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+    }
+    .cta-sub {
+      font-size: 0.7rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: rgba(250,248,242,0.38);
+      margin-bottom: 3rem;
+    }
+    .cta-btns {
+      display: flex;
+      gap: 1.2rem;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .btn-gold {
+      padding: 0.95rem 2.6rem;
+      background: var(--or);
+      color: var(--noir);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      font-weight: 500;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s, transform 0.3s;
+    }
+    .btn-gold:hover { background: var(--or-clair); transform: translateY(-2px); }
+
+    .btn-outline {
+      padding: 0.95rem 2.6rem;
+      background: transparent;
+      color: var(--or);
+      border: 1px solid var(--or);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.6rem;
+      letter-spacing: 0.24em;
+      text-transform: uppercase;
+      font-weight: 300;
+      text-decoration: none;
+      display: inline-block;
+      transition: background 0.3s, color 0.3s, transform 0.3s;
+    }
+    .btn-outline:hover { background: var(--or); color: var(--noir); transform: translateY(-2px); }
+
+    /* ============================================================
+       FOOTER
+    ============================================================ */
+    footer {
+      background: #050505;
+      padding: 3.5rem 4vw 2.5rem;
+      border-top: 1px solid rgba(201,168,76,0.18);
+      text-align: center;
+    }
+    .footer-logo {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.55rem;
+      letter-spacing: 0.52em;
+      color: var(--or);
+      font-weight: 300;
+      margin-bottom: 2rem;
+    }
+    .footer-nav {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .footer-nav a {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(250,248,242,0.3);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-nav a:hover { color: var(--or); }
+    .footer-copy {
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      color: rgba(250,248,242,0.18);
+    }
+
+    /* ============================================================
+       UTILITAIRE
+    ============================================================ */
+    canvas { display: block; }
   </style>
 </head>
 <body>
 
-  <div id="loading"><div class="loader-ring"></div></div>
+  <!-- ============================================================
+       PRELOADER
+  ============================================================ -->
+  <div id="preloader">
+    <div class="pre-logo">AURÉA</div>
+    <div class="pre-bar-track"><div id="pre-bar"></div></div>
+    <div class="pre-status">Chargement...</div>
+  </div>
 
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <nav id="navbar">
+    <ul class="nav-links">
+      <li><a href="#hero">Maison</a></li>
+      <li><a href="#collection">Collection</a></li>
+      <li><a href="#savoir-faire">Savoir-faire</a></li>
+    </ul>
+
+    <a href="#hero" class="nav-logo">AURÉA</a>
+
+    <ul class="nav-links">
+      <li><a href="#cta">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============================================================
+       SECTION 1 — HERO
+  ============================================================ -->
   <section id="hero">
-    <div id="sticky">
-      <canvas id="three-canvas"></canvas>
+    <div id="hero-bg">
+      <h1 class="hero-wordmark">AURÉA</h1>
+      <p class="hero-baseline">La joaillerie céleste</p>
+    </div>
 
-      <div id="text-panel">
-        <div class="face-text active" data-face="0">
-          <span class="label">I</span>
-          <h2>Façonné dans&nbsp;la&nbsp;lumière</h2>
-        </div>
-        <div class="face-text" data-face="1">
-          <span class="label">II</span>
-          <h2>Chaque détail raconte une&nbsp;histoire</h2>
-        </div>
-        <div class="face-text" data-face="2">
-          <span class="label">III</span>
-          <h2>L'art prend vie entre vos&nbsp;mains</h2>
-        </div>
-        <div class="face-text" data-face="3">
-          <span class="label">IV</span>
-          <h2>Une&nbsp;oeuvre, une&nbsp;émotion</h2>
-        </div>
-      </div>
+    <!-- Indicateur scroll (dans hero-bg pour qu'il soit sur le fond) -->
+    <div id="scroll-cue">
+      <span>Découvrir</span>
+      <div class="cue-line"></div>
+    </div>
 
-      <div id="scroll-hint">
-        <span>Défiler</span>
-        <div class="scroll-line"></div>
+    <!-- Canvas overlay (s'estompe lors de la transition) -->
+    <canvas id="hero-canvas"></canvas>
+  </section>
+
+  <!-- ============================================================
+       SECTION 2 — SCROLL-DRIVEN 3D
+  ============================================================ -->
+  <section id="section-3d">
+    <div class="sticky-stage">
+      <canvas id="main-canvas"></canvas>
+
+      <div class="msg-layer">
+        <!-- Étape 1 : 0–25 % -->
+        <div class="msg-step active" id="msg-0">
+          <div class="msg-surtitre">Maison Auréa</div>
+          <h2 class="msg-titre">Née de<br>la lumière</h2>
+          <p class="msg-corps">Chaque pièce Auréa est sculptée dans l'obsession du détail, comme une œuvre d'art destinée à traverser les générations.</p>
+        </div>
+
+        <!-- Étape 2 : 25–50 % -->
+        <div class="msg-step" id="msg-1">
+          <div class="msg-surtitre">Savoir-faire</div>
+          <h2 class="msg-titre">L'art de<br>l'éternel</h2>
+          <p class="msg-corps">Nos artisans perpétuent des techniques ancestrales pour donner vie à des bijoux d'une précision absolue.</p>
+        </div>
+
+        <!-- Étape 3 : 50–75 % -->
+        <div class="msg-step" id="msg-2">
+          <div class="msg-surtitre">Matières</div>
+          <h2 class="msg-titre">Or, diamant,<br>lumière</h2>
+          <p class="msg-corps">Nous sélectionnons uniquement les pierres et métaux précieux les plus rares, sourcés de manière éthique et responsable.</p>
+        </div>
+
+        <!-- Étape 4 : 75–100 % -->
+        <div class="msg-step" id="msg-3">
+          <div class="msg-surtitre">Collection</div>
+          <h2 class="msg-titre">Céleste, la nouvelle<br>collection</h2>
+          <p class="msg-corps">Inspirée des formes célestes et de la pureté angélique. Disponible sur commande.</p>
+          <a href="#collection" class="msg-cta">Découvrir la collection</a>
+        </div>
       </div>
     </div>
   </section>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
+  <!-- ============================================================
+       SECTION 3 — COLLECTION
+  ============================================================ -->
+  <section id="collection">
+    <span class="sec-eyebrow">Haute Joaillerie</span>
+    <h2 class="sec-title">Collection Céleste</h2>
+    <p class="sec-sub">Pièces uniques, créées pour l'éternité</p>
+
+    <div class="cards-row">
+      <article class="card card-1 fade-up">
+        <div class="card-thumb"></div>
+        <div class="card-body">
+          <div class="card-name">Anneau Séraphin</div>
+          <div class="card-mat">Or 18 carats · Diamants</div>
+          <div class="card-prix">Sur devis</div>
+        </div>
+      </article>
+
+      <article class="card card-2 fade-up">
+        <div class="card-thumb"></div>
+        <div class="card-body">
+          <div class="card-name">Collier Céleste</div>
+          <div class="card-mat">Or blanc · Saphirs</div>
+          <div class="card-prix">Sur devis</div>
+        </div>
+      </article>
+
+      <article class="card card-3 fade-up">
+        <div class="card-thumb"></div>
+        <div class="card-body">
+          <div class="card-name">Bague Luminis</div>
+          <div class="card-mat">Or rose · Rubis</div>
+          <div class="card-prix">Sur devis</div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 4 — SAVOIR-FAIRE
+  ============================================================ -->
+  <section id="savoir-faire">
+    <span class="sec-eyebrow">Excellence</span>
+    <h2 class="sec-title">L'obsession du détail</h2>
+
+    <div class="sf-cols">
+      <!-- Colonne 1 -->
+      <div class="sf-col slide-up">
+        <svg class="sf-icon" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="20" stroke="#C9A84C" stroke-width="0.8" opacity="0.35"/>
+          <polygon points="22,11 26.5,19.5 35,19.5 28.5,25 31,33.5 22,28 13,33.5 15.5,25 9,19.5 17.5,19.5" stroke="#C9A84C" stroke-width="0.9" fill="none"/>
+        </svg>
+        <h3 class="sf-col-title">Artisanat d'exception</h3>
+        <p class="sf-col-text">Chaque bijou est façonné à la main par nos maîtres joailliers, héritiers d'un savoir-faire transmis de génération en génération.</p>
+      </div>
+
+      <div class="sf-sep"></div>
+
+      <!-- Colonne 2 -->
+      <div class="sf-col slide-up">
+        <svg class="sf-icon" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="20" stroke="#C9A84C" stroke-width="0.8" opacity="0.35"/>
+          <path d="M22 10 C22 10,31 16,31 22 C31 28,22 34,22 34 C22 34,13 28,13 22 C13 16,22 10,22 10Z" stroke="#C9A84C" stroke-width="0.9"/>
+          <circle cx="22" cy="22" r="4" stroke="#C9A84C" stroke-width="0.8"/>
+        </svg>
+        <h3 class="sf-col-title">Matières éthiques</h3>
+        <p class="sf-col-text">Or certifié, pierres tracées, engagement environnemental. Chaque sourcing est soumis à notre charte d'excellence et de responsabilité.</p>
+      </div>
+
+      <div class="sf-sep"></div>
+
+      <!-- Colonne 3 -->
+      <div class="sf-col slide-up">
+        <svg class="sf-icon" viewBox="0 0 44 44" fill="none">
+          <circle cx="22" cy="22" r="20" stroke="#C9A84C" stroke-width="0.8" opacity="0.35"/>
+          <circle cx="22" cy="22" r="9"  stroke="#C9A84C" stroke-width="0.9"/>
+          <circle cx="22" cy="22" r="3"  fill="#C9A84C" opacity="0.6"/>
+          <circle cx="22" cy="22" r="15" stroke="#C9A84C" stroke-width="0.4" opacity="0.25" stroke-dasharray="2 3"/>
+        </svg>
+        <h3 class="sf-col-title">Pièces uniques</h3>
+        <p class="sf-col-text">Aucune série. Chaque création est une œuvre singulière, imaginée sur mesure pour celui ou celle qui la portera.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       SECTION 5 — CTA
+  ============================================================ -->
+  <section id="cta">
+    <div class="cta-rule"></div>
+
+    <div class="cta-stars" aria-hidden="true">
+      <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l.7 4L10 5l-4.3 1L5 10l-.7-4L0 5l4.3-1Z" fill="#C9A84C"/></svg>
+      <svg width="7"  height="7"  viewBox="0 0 10 10"><path d="M5 0l.7 4L10 5l-4.3 1L5 10l-.7-4L0 5l4.3-1Z" fill="#C9A84C" opacity=".5"/></svg>
+      <svg width="14" height="14" viewBox="0 0 10 10"><path d="M5 0l.7 4L10 5l-4.3 1L5 10l-.7-4L0 5l4.3-1Z" fill="#C9A84C"/></svg>
+      <svg width="7"  height="7"  viewBox="0 0 10 10"><path d="M5 0l.7 4L10 5l-4.3 1L5 10l-.7-4L0 5l4.3-1Z" fill="#C9A84C" opacity=".5"/></svg>
+      <svg width="10" height="10" viewBox="0 0 10 10"><path d="M5 0l.7 4L10 5l-4.3 1L5 10l-.7-4L0 5l4.3-1Z" fill="#C9A84C"/></svg>
+    </div>
+
+    <h2 class="cta-title">Votre bijou,<br>votre histoire</h2>
+    <p class="cta-sub">Prenez rendez-vous dans notre atelier</p>
+
+    <div class="cta-btns">
+      <a href="#" class="btn-gold">Prendre rendez-vous</a>
+      <a href="#collection" class="btn-outline">Voir la collection</a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <span class="footer-logo">AURÉA</span>
+    <ul class="footer-nav">
+      <li><a href="#hero">Maison</a></li>
+      <li><a href="#collection">Collection</a></li>
+      <li><a href="#savoir-faire">Savoir-faire</a></li>
+      <li><a href="#cta">Contact</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 Auréa. Joaillerie d'exception.</p>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Helpers ─────────────────────────────────────────── */
+    const lerp  = (a, b, t) => a + (b - a) * t;
+    const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+    const isMobile = () => window.innerWidth < 768;
+
+    /* ── Preloader ───────────────────────────────────────── */
+    const preloader = document.getElementById('preloader');
+    const preBar    = document.getElementById('pre-bar');
+
+    let preProgress = 0;
+    function setProgress(p) {
+      preProgress = Math.max(preProgress, p);
+      preBar.style.width = preProgress + '%';
     }
-  }
-  </script>
-
-  <script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
-
-    const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
-
-    /* ── Renderer ──────────────────────────────────────── */
-    const canvas = document.getElementById('three-canvas');
-
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace      = THREE.SRGBColorSpace;
-    renderer.toneMapping           = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure   = 1.25;
-
-    /* ── Scene ─────────────────────────────────────────── */
-    const scene = new THREE.Scene();
-
-    // Environment map — gives subtle ambient reflections to the material
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    pmrem.dispose();
-
-    /* ── Camera ────────────────────────────────────────── */
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
-    camera.position.set(0, 0, 3.5);
-
-    /* ── Lighting ──────────────────────────────────────── */
-    // Soft ambient fill
-    scene.add(new THREE.AmbientLight(0xfff4e6, 0.3));
-
-    // Key light — front, slightly above-right
-    const key = new THREE.DirectionalLight(0xffeed8, 2.8);
-    key.position.set(2, 3, 4);
-    scene.add(key);
-
-    // Fill light — cooler, left side
-    const fill = new THREE.DirectionalLight(0xdce8ff, 0.5);
-    fill.position.set(-3, 0.5, 2);
-    scene.add(fill);
-
-    // Rim light — behind model, gives silhouette depth
-    const rim = new THREE.DirectionalLight(0xaabbdd, 1.3);
-    rim.position.set(-1.5, 2, -4);
-    scene.add(rim);
-
-    /* ── Load GLB ──────────────────────────────────────── */
-    let model = null;
-    const loadingEl = document.getElementById('loading');
-
-    function onModelReady() {
-      loadingEl.classList.add('hidden');
+    function dismissPreloader() {
+      preloader.classList.add('hidden');
     }
 
-    new GLTFLoader().load(
-      './angel_bust.glb',
+    /* Progression fictive jusqu'à 40 % pendant que Three charge */
+    const fakeTimer = setInterval(() => {
+      setProgress(preProgress + 2);
+      if (preProgress >= 40) clearInterval(fakeTimer);
+    }, 80);
+
+    /* ── Navbar ──────────────────────────────────────────── */
+    window.addEventListener('scroll', () => {
+      document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 44);
+    }, { passive: true });
+
+    /* ── Intersection Observer (fade-up, slide-up) ───────── */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.14 });
+
+    document.querySelectorAll('.fade-up, .slide-up').forEach(el => io.observe(el));
+
+    /* ====================================================
+       THREE.JS — Scène principale (section-3d)
+    ==================================================== */
+    const mainCanvas = document.getElementById('main-canvas');
+
+    const mainRenderer = new THREE.WebGLRenderer({
+      canvas: mainCanvas,
+      antialias: true,
+      alpha: true,
+    });
+    mainRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    mainRenderer.shadowMap.enabled = true;
+    mainRenderer.shadowMap.type    = THREE.PCFSoftShadowMap;
+    mainRenderer.toneMapping       = THREE.ACESFilmicToneMapping;
+    mainRenderer.toneMappingExposure = 1.2;
+
+    const mainScene  = new THREE.Scene();
+    const mainCamera = new THREE.PerspectiveCamera(45, 1, 0.01, 100);
+    mainCamera.position.set(0, 0, 5);
+
+    /* ── Lumières ──────────────────────────────────────── */
+    mainScene.add(new THREE.AmbientLight(0xffffff, 0.3));
+
+    const dirLight = new THREE.DirectionalLight(0xffffff, 1.5);
+    dirLight.position.set(0, 2, 4);
+    dirLight.castShadow = true;
+    mainScene.add(dirLight);
+
+    const goldLight = new THREE.PointLight(0xC9A84C, 1.0, 20);
+    goldLight.position.set(3, 1, 2);
+    mainScene.add(goldLight);
+
+    const rimLight = new THREE.DirectionalLight(0xffffff, 0.5);
+    rimLight.position.set(0, 0, -5);
+    mainScene.add(rimLight);
+
+    const spot = new THREE.SpotLight(0xffd599, 0.8, 20, Math.PI / 6, 0.4);
+    spot.position.set(0, 8, 3);
+    spot.castShadow = true;
+    mainScene.add(spot);
+
+    /* ── Chargement GLB ────────────────────────────────── */
+    let mainModel = null;
+
+    const loader = new THREE.GLTFLoader();
+
+    loader.load(
+      'angel-bust.glb',
       (gltf) => {
-        model = gltf.scene;
+        clearInterval(fakeTimer);
+        setProgress(100);
 
-        // Normalize size and center at origin
-        const box    = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        const size   = box.getSize(new THREE.Vector3());
-        const scale  = 1.8 / Math.max(size.x, size.y, size.z);
+        const mdl = gltf.scene;
 
-        model.scale.setScalar(scale);
-        model.position.set(
-          -center.x * scale + (IS_DESKTOP ? -0.22 : 0),
-          -center.y * scale,
-          -center.z * scale
-        );
+        /* Normaliser & centrer */
+        const box = new THREE.Box3().setFromObject(mdl);
+        const sz  = new THREE.Vector3();
+        box.getSize(sz);
+        const s = 2.6 / Math.max(sz.x, sz.y, sz.z);
+        mdl.scale.setScalar(s);
 
-        scene.add(model);
-        onModelReady();
-      },
-      undefined,
-      (err) => {
-        // Fallback placeholder when GLB is absent
-        console.warn('GLB not found — showing placeholder:', err.message);
-        const geo = new THREE.TorusKnotGeometry(0.55, 0.18, 160, 32);
-        const mat = new THREE.MeshStandardMaterial({
-          color: 0xc4a06a,
-          metalness: 0.15,
-          roughness: 0.55,
+        box.setFromObject(mdl);
+        const c = new THREE.Vector3();
+        box.getCenter(c);
+        mdl.position.sub(c);
+
+        /* Décaler légèrement à gauche pour laisser la place aux textes */
+        if (!isMobile()) mdl.position.x -= 0.5;
+
+        mdl.traverse(child => {
+          if (child.isMesh) {
+            child.castShadow    = true;
+            child.receiveShadow = true;
+          }
         });
-        model = new THREE.Mesh(geo, mat);
-        scene.add(model);
-        onModelReady();
+
+        mainScene.add(mdl);
+        mainModel = mdl;
+
+        setTimeout(dismissPreloader, 400);
+      },
+      (xhr) => {
+        if (xhr.total > 0) setProgress(40 + (xhr.loaded / xhr.total) * 60);
+      },
+      () => {
+        /* Fallback géométrique si le GLB est absent */
+        clearInterval(fakeTimer);
+        setProgress(100);
+
+        const geo  = new THREE.SphereGeometry(1.2, 64, 64);
+        const mat  = new THREE.MeshStandardMaterial({
+          color: 0xC9A84C, metalness: 0.82, roughness: 0.18,
+        });
+        mainModel = new THREE.Mesh(geo, mat);
+        mainScene.add(mainModel);
+
+        setTimeout(dismissPreloader, 400);
       }
     );
 
+    /* ── Resize principale ─────────────────────────────── */
+    function resizeMain() {
+      const p = mainCanvas.parentElement;
+      const w = p.clientWidth;
+      const h = p.clientHeight;
+      mainRenderer.setSize(w, h);
+      mainCamera.aspect = w / h;
+      mainCamera.updateProjectionMatrix();
+    }
+    window.addEventListener('resize', resizeMain);
+    resizeMain();
+
     /* ── Scroll → rotation ─────────────────────────────── */
-    let targetY  = 0;
-    let currentY = 0;
-    const LERP   = 0.07; // smoothing factor (~60fps)
+    const sec3d   = document.getElementById('section-3d');
+    const msgs    = [0,1,2,3].map(i => document.getElementById('msg-' + i));
 
-    function onScroll() {
-      const hero = document.getElementById('hero');
-      const raw  = window.scrollY - hero.offsetTop;
-      const max  = hero.offsetHeight - window.innerHeight;
-      const p    = Math.max(0, Math.min(1, raw / max));
+    let targetRotY  = 0;
+    let currentRotY = 0;
+    let targetScale  = 1;
+    let currentScale = 1;
 
-      targetY = p * Math.PI * 2; // 0 → full 360°
-
-      document.getElementById('scroll-hint')
-        .classList.toggle('gone', p > 0.015);
+    function getProgress3D() {
+      const rect  = sec3d.getBoundingClientRect();
+      const total = sec3d.offsetHeight - window.innerHeight;
+      return clamp(-rect.top / total, 0, 1);
     }
 
-    if (IS_DESKTOP) {
-      window.addEventListener('scroll', onScroll, { passive: true });
+    function updateMsgs(p) {
+      const ranges = [[0,0.25],[0.25,0.5],[0.5,0.75],[0.75,1]];
+      msgs.forEach((m, i) => {
+        m.classList.toggle('active', p >= ranges[i][0] && p < ranges[i][1]);
+      });
     }
 
-    /* ── Face text switching ───────────────────────────── */
-    const faceEls  = document.querySelectorAll('.face-text');
-    let activeFace = 0;
-
-    function getFace(ry) {
-      const d = (((ry * 180 / Math.PI) % 360) + 360) % 360;
-      // 0° ±45° → face 0, 90° ±45° → face 1, etc.
-      if (d < 45 || d >= 315) return 0;
-      if (d < 135) return 1;
-      if (d < 225) return 2;
-      return 3;
+    function onScroll3D() {
+      const p = getProgress3D();
+      targetRotY   = p * Math.PI * 4;                          // 2 tours
+      targetScale  = p > 0.9 ? lerp(1, 0.7, (p - 0.9) / 0.1) : 1;
+      updateMsgs(p);
     }
 
-    function setFace(f) {
-      if (f === activeFace) return;
-      activeFace = f;
-      faceEls.forEach((el, i) => el.classList.toggle('active', i === f));
+    /* ── Hero transition ───────────────────────────────── */
+    const heroBg     = document.getElementById('hero-bg');
+    const heroCanvas = document.getElementById('hero-canvas');
+    const scrollCue  = document.getElementById('scroll-cue');
+
+    let heroOpacity     = 0;
+    let heroSceneReady  = false;
+    let heroRenderer    = null;
+    let heroScene       = null;
+    let heroCamera      = null;
+    let heroModel       = null;
+
+    function initHeroScene() {
+      if (heroSceneReady) return;
+      heroSceneReady = true;
+
+      heroRenderer = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias: true, alpha: true });
+      heroRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      heroRenderer.toneMapping = THREE.ACESFilmicToneMapping;
+      heroRenderer.toneMappingExposure = 1.2;
+      heroRenderer.setSize(window.innerWidth, window.innerHeight);
+
+      heroScene  = new THREE.Scene();
+      heroCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100);
+      heroCamera.position.set(0, 0, 5);
+
+      heroScene.add(new THREE.AmbientLight(0xffffff, 0.3));
+      const dl = new THREE.DirectionalLight(0xffffff, 1.5); dl.position.set(0,2,4); heroScene.add(dl);
+      const pl = new THREE.PointLight(0xC9A84C, 1.0, 20);   pl.position.set(3,1,2); heroScene.add(pl);
+      const rl = new THREE.DirectionalLight(0xffffff, 0.5);  rl.position.set(0,0,-5); heroScene.add(rl);
+
+      if (mainModel) {
+        heroModel = mainModel.clone();
+        heroScene.add(heroModel);
+      }
     }
 
-    /* ── Resize ────────────────────────────────────────── */
-    function resize() {
-      const rect = canvas.getBoundingClientRect();
-      const w = Math.round(rect.width);
-      const h = Math.round(rect.height);
-      if (!w || !h) return;
-      renderer.setSize(w, h, false);
-      camera.aspect = w / h;
-      camera.updateProjectionMatrix();
+    function onScrollHero() {
+      const heroH = document.getElementById('hero').offsetHeight;
+      const p = clamp(window.scrollY / (heroH * 0.08), 0, 1);
+
+      if (p > 0 && !heroSceneReady) initHeroScene();
+
+      heroOpacity = p;
+      heroCanvas.style.opacity = p;
+
+      heroBg.classList.toggle('fade-out', p >= 1);
+      scrollCue.style.opacity = String(1 - p * 3);
     }
 
-    new ResizeObserver(resize).observe(canvas);
-    resize();
+    function onScrollAll() {
+      onScrollHero();
+      if (!isMobile()) onScroll3D();
+    }
 
-    /* ── Render loop ───────────────────────────────────── */
+    window.addEventListener('scroll', onScrollAll, { passive: true });
+
+    window.addEventListener('resize', () => {
+      if (!heroRenderer) return;
+      heroRenderer.setSize(window.innerWidth, window.innerHeight);
+      heroCamera.aspect = window.innerWidth / window.innerHeight;
+      heroCamera.updateProjectionMatrix();
+    });
+
+    /* ── Boucle de rendu ───────────────────────────────── */
+    let clock = 0;
+
     function animate() {
       requestAnimationFrame(animate);
+      clock += 0.005;
 
-      if (IS_DESKTOP) {
-        currentY += (targetY - currentY) * LERP;
+      /* Scène principale */
+      if (mainModel) {
+        currentRotY  = lerp(currentRotY,  targetRotY,  0.06);
+        currentScale = lerp(currentScale, targetScale, 0.05);
+
+        mainModel.rotation.y = currentRotY;
+        mainModel.scale.setScalar(currentScale);
+        mainModel.position.y = Math.sin(clock) * 0.04;
       }
+      mainRenderer.render(mainScene, mainCamera);
 
-      if (model) {
-        model.rotation.y = currentY;
-        if (IS_DESKTOP) setFace(getFace(currentY));
+      /* Scène hero */
+      if (heroRenderer && heroModel) {
+        heroModel.rotation.y += 0.003;
+        heroModel.position.y  = Math.sin(clock * 1.2) * 0.03;
+        heroRenderer.render(heroScene, heroCamera);
       }
-
-      renderer.render(scene, camera);
     }
 
     animate();
+
+    /* ── Mobile : rotation douce en boucle ─────────────── */
+    if (isMobile()) {
+      msgs.forEach(m => m.classList.add('active'));
+      setInterval(() => { targetRotY += 0.008; }, 16);
+    }
+
+  })();
   </script>
 </body>
 </html>
