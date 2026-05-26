@@ -1,0 +1,766 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — AURÉA Joaillerie</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=Montserrat:wght@200;300;400;500&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       RESET & VARIABLES — identiques à index.html
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --noir:     #080808;
+      --noir-2:   #0f0f0f;
+      --gris:     #1a1a1a;
+      --or:       #C9A84C;
+      --or-clair: #E8C96A;
+      --creme:    #FAF8F2;
+      --ease:     cubic-bezier(0.4, 0, 0.2, 1);
+      --field-bg:     #111111;
+      --field-border: #333333;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--noir);
+      color: var(--creme);
+      font-family: 'Montserrat', sans-serif;
+      font-weight: 300;
+      overflow-x: hidden;
+    }
+
+    /* ============================================================
+       NAVBAR — identique à index.html
+    ============================================================ */
+    #navbar {
+      position: fixed;
+      inset: 0 0 auto 0;
+      z-index: 1000;
+      height: 72px;
+      padding: 0 4vw;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      background: var(--noir);
+      border-bottom: 1px solid rgba(201,168,76,0.22);
+      transition: background 0.5s var(--ease), border-color 0.5s;
+    }
+    #navbar.at-top {
+      background: transparent;
+      border-bottom-color: transparent;
+    }
+
+    .nav-links {
+      list-style: none;
+      display: flex;
+      gap: 2.8rem;
+    }
+    .nav-links a {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(250,248,242,0.55);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .nav-links a:hover,
+    .nav-links a.active { color: var(--or-clair); }
+
+    .nav-logo {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.4rem;
+      letter-spacing: 0.5em;
+      color: var(--or);
+      font-weight: 300;
+      text-decoration: none;
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+    }
+
+    @media (max-width: 767px) {
+      .nav-links { display: none; }
+      .nav-logo  { position: static; transform: none; }
+      #navbar    { justify-content: center; }
+    }
+
+    /* ============================================================
+       HERO — 40vh
+    ============================================================ */
+    #hero {
+      height: 40vh;
+      min-height: 280px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 72px 4vw 0;
+      background: linear-gradient(160deg, #0d0d0d 0%, var(--gris) 55%, #090909 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    #hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 55% 45% at 50% 65%, rgba(201,168,76,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .hero-eyebrow {
+      font-size: 0.58rem;
+      letter-spacing: 0.38em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 1.3rem;
+    }
+    .hero-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(2rem, 5.5vw, 4.5rem);
+      font-weight: 300;
+      letter-spacing: 0.22em;
+      color: var(--creme);
+      line-height: 1.1;
+      margin-bottom: 1.2rem;
+    }
+    .hero-sub {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.88rem, 1.7vw, 1.2rem);
+      color: rgba(250,248,242,0.48);
+      letter-spacing: 0.06em;
+    }
+
+    /* ============================================================
+       SECTION PRINCIPALE — deux colonnes
+    ============================================================ */
+    #main-section {
+      padding: 7rem 4vw 7rem;
+      max-width: 1200px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr 1.55fr;
+      gap: 6rem;
+      align-items: start;
+    }
+    @media (max-width: 900px) {
+      #main-section {
+        grid-template-columns: 1fr;
+        gap: 4rem;
+        padding: 5rem 6vw;
+      }
+    }
+
+    /* ── Colonne gauche : infos atelier ──────────────────── */
+    .atelier-col {}
+
+    .col-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      margin-bottom: 2.5rem;
+      line-height: 1.2;
+    }
+
+    .info-block {
+      display: flex;
+      flex-direction: column;
+      gap: 1.8rem;
+      margin-bottom: 2.5rem;
+    }
+
+    .info-item {}
+
+    .info-label {
+      font-size: 0.55rem;
+      letter-spacing: 0.3em;
+      text-transform: uppercase;
+      color: var(--or);
+      margin-bottom: 0.55rem;
+      display: block;
+    }
+
+    .info-value {
+      font-size: 0.78rem;
+      line-height: 1.85;
+      color: rgba(250,248,242,0.65);
+      letter-spacing: 0.03em;
+    }
+    .info-value a {
+      color: rgba(250,248,242,0.65);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .info-value a:hover { color: var(--or-clair); }
+
+    .atelier-rule {
+      width: 100%;
+      height: 1px;
+      background: linear-gradient(90deg, rgba(201,168,76,0.35), transparent);
+      margin: 2.5rem 0;
+    }
+
+    .atelier-note {
+      font-family: 'Cormorant Garamond', serif;
+      font-style: italic;
+      font-size: clamp(0.9rem, 1.4vw, 1.1rem);
+      color: rgba(250,248,242,0.38);
+      line-height: 1.75;
+      letter-spacing: 0.03em;
+    }
+
+    /* ── Colonne droite : formulaire ─────────────────────── */
+    .form-col {}
+
+    .form-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: clamp(1.6rem, 2.8vw, 2.4rem);
+      font-weight: 300;
+      letter-spacing: 0.05em;
+      margin-bottom: 2.5rem;
+    }
+
+    /* Formulaire */
+    #contact-form {
+      display: flex;
+      flex-direction: column;
+      gap: 1.4rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .form-group label {
+      font-size: 0.55rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(250,248,242,0.45);
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      background: var(--field-bg);
+      border: 1px solid var(--field-border);
+      border-radius: 2px;
+      color: var(--creme);
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.75rem;
+      font-weight: 300;
+      letter-spacing: 0.04em;
+      padding: 0.85rem 1rem;
+      outline: none;
+      transition: border-color 0.3s;
+      width: 100%;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .form-group input::placeholder,
+    .form-group textarea::placeholder {
+      color: rgba(250,248,242,0.2);
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      border-color: var(--or);
+    }
+
+    /* Select custom arrow */
+    .select-wrap {
+      position: relative;
+    }
+    .select-wrap::after {
+      content: '';
+      position: absolute;
+      right: 1rem;
+      top: 50%;
+      transform: translateY(-50%) rotate(45deg);
+      width: 6px;
+      height: 6px;
+      border-right: 1px solid rgba(201,168,76,0.6);
+      border-bottom: 1px solid rgba(201,168,76,0.6);
+      pointer-events: none;
+    }
+    .select-wrap select {
+      cursor: pointer;
+    }
+    .select-wrap select option {
+      background: #111;
+      color: var(--creme);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 120px;
+    }
+
+    /* Checkbox */
+    .checkbox-group {
+      display: flex;
+      align-items: flex-start;
+      gap: 0.9rem;
+      cursor: pointer;
+    }
+    .checkbox-group input[type="checkbox"] {
+      width: 16px;
+      height: 16px;
+      min-width: 16px;
+      flex-shrink: 0;
+      margin-top: 1px;
+      accent-color: var(--or);
+      cursor: pointer;
+    }
+    .checkbox-group span {
+      font-size: 0.68rem;
+      line-height: 1.65;
+      color: rgba(250,248,242,0.45);
+      letter-spacing: 0.03em;
+    }
+
+    /* Bouton submit */
+    .btn-submit {
+      width: 100%;
+      padding: 1.1rem 2rem;
+      background: var(--or);
+      color: var(--noir);
+      border: none;
+      font-family: 'Montserrat', sans-serif;
+      font-size: 0.62rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      font-weight: 500;
+      cursor: pointer;
+      border-radius: 2px;
+      transition: background 0.3s, transform 0.3s;
+      margin-top: 0.4rem;
+    }
+    .btn-submit:hover { background: var(--or-clair); transform: translateY(-1px); }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* Message de confirmation */
+    #confirm-msg {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+      padding: 3rem 2rem;
+      gap: 1.5rem;
+      border: 1px solid rgba(201,168,76,0.2);
+      background: rgba(201,168,76,0.03);
+    }
+    #confirm-msg.visible { display: flex; }
+
+    .confirm-icon {
+      width: 48px;
+      height: 48px;
+    }
+    .confirm-title {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.6rem;
+      font-weight: 300;
+      color: var(--creme);
+      letter-spacing: 0.05em;
+    }
+    .confirm-text {
+      font-size: 0.72rem;
+      line-height: 1.85;
+      color: rgba(250,248,242,0.5);
+      letter-spacing: 0.03em;
+    }
+
+    /* ============================================================
+       SECTION MAP PLACEHOLDER
+    ============================================================ */
+    #map-section {
+      background: var(--noir-2);
+      padding: 0 0 5rem;
+    }
+
+    .map-placeholder {
+      width: 100%;
+      height: 300px;
+      background: var(--gris);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1.2rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Grille décorative façon plan */
+    .map-placeholder::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(201,168,76,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(201,168,76,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    /* Point central */
+    .map-placeholder::after {
+      content: '';
+      position: absolute;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: var(--or);
+      box-shadow: 0 0 0 6px rgba(201,168,76,0.15), 0 0 0 14px rgba(201,168,76,0.06);
+      top: calc(50% - 20px);
+    }
+
+    .map-address {
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.1rem;
+      font-weight: 300;
+      letter-spacing: 0.12em;
+      color: var(--or);
+      position: relative;
+      z-index: 1;
+      margin-top: 2rem;
+    }
+
+    .map-link {
+      display: inline-block;
+      position: relative;
+      z-index: 1;
+      padding: 0.65rem 1.8rem;
+      border: 1px solid rgba(201,168,76,0.35);
+      color: rgba(250,248,242,0.55);
+      font-size: 0.58rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      text-decoration: none;
+      transition: border-color 0.3s, color 0.3s;
+    }
+    .map-link:hover { border-color: var(--or); color: var(--or); }
+
+    /* ============================================================
+       ANIMATIONS
+    ============================================================ */
+    .fade-up {
+      opacity: 0;
+      transform: translateY(30px);
+      transition: opacity 0.75s var(--ease), transform 0.75s var(--ease);
+    }
+    .fade-up.visible { opacity: 1; transform: translateY(0); }
+
+    .fade-up-delay-1 { transition-delay: 0.1s; }
+    .fade-up-delay-2 { transition-delay: 0.2s; }
+
+    /* ============================================================
+       FOOTER — identique à index.html
+    ============================================================ */
+    footer {
+      background: #050505;
+      padding: 3.5rem 4vw 2.5rem;
+      border-top: 1px solid rgba(201,168,76,0.18);
+      text-align: center;
+    }
+    .footer-logo {
+      display: block;
+      font-family: 'Cormorant Garamond', serif;
+      font-size: 1.55rem;
+      letter-spacing: 0.52em;
+      color: var(--or);
+      font-weight: 300;
+      margin-bottom: 2rem;
+      text-decoration: none;
+    }
+    .footer-nav {
+      list-style: none;
+      display: flex;
+      justify-content: center;
+      gap: 2.5rem;
+      flex-wrap: wrap;
+      margin-bottom: 2.5rem;
+    }
+    .footer-nav a {
+      font-size: 0.6rem;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(250,248,242,0.3);
+      text-decoration: none;
+      transition: color 0.3s;
+    }
+    .footer-nav a:hover { color: var(--or); }
+    .footer-copy {
+      font-size: 0.58rem;
+      letter-spacing: 0.14em;
+      color: rgba(250,248,242,0.18);
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ============================================================
+       NAVBAR
+  ============================================================ -->
+  <nav id="navbar">
+    <ul class="nav-links">
+      <li><a href="index.html">Maison</a></li>
+      <li><a href="collection.html">Collection</a></li>
+      <li><a href="index.html#savoir-faire">Savoir-faire</a></li>
+    </ul>
+
+    <a href="index.html" class="nav-logo">AURÉA</a>
+
+    <ul class="nav-links">
+      <li><a href="contact.html" class="active">Contact</a></li>
+    </ul>
+  </nav>
+
+  <!-- ============================================================
+       HERO
+  ============================================================ -->
+  <section id="hero">
+    <span class="hero-eyebrow">Atelier · Paris</span>
+    <h1 class="hero-title">Nous contacter</h1>
+    <p class="hero-sub">Prenez rendez-vous dans notre atelier</p>
+  </section>
+
+  <!-- ============================================================
+       SECTION PRINCIPALE
+  ============================================================ -->
+  <section id="main-section">
+
+    <!-- Colonne gauche : infos -->
+    <div class="atelier-col fade-up">
+      <h2 class="col-title">L'Atelier Auréa</h2>
+
+      <div class="info-block">
+        <div class="info-item">
+          <span class="info-label">Adresse</span>
+          <p class="info-value">12 rue de la Paix<br>75001 Paris, France</p>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Horaires</span>
+          <p class="info-value">
+            Lundi — Vendredi&nbsp;: 10h — 18h<br>
+            Samedi&nbsp;: 10h — 17h<br>
+            Sur rendez-vous uniquement
+          </p>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Email</span>
+          <p class="info-value">
+            <a href="mailto:contact@aurea-joaillerie.com">contact@aurea-joaillerie.com</a>
+          </p>
+        </div>
+
+        <div class="info-item">
+          <span class="info-label">Téléphone</span>
+          <p class="info-value">
+            <a href="tel:+33123456789">+33 1 23 45 67 89</a>
+          </p>
+        </div>
+      </div>
+
+      <div class="atelier-rule"></div>
+
+      <p class="atelier-note">
+        Consultations privées disponibles<br>
+        en dehors des horaires d'ouverture.
+      </p>
+    </div>
+
+    <!-- Colonne droite : formulaire -->
+    <div class="form-col fade-up fade-up-delay-1">
+      <h2 class="form-title">Votre demande</h2>
+
+      <!-- Formulaire -->
+      <form id="contact-form" novalidate>
+        <!-- Prénom + Nom -->
+        <div class="form-row">
+          <div class="form-group">
+            <label for="prenom">Prénom</label>
+            <input type="text" id="prenom" name="prenom" placeholder="Marie" required />
+          </div>
+          <div class="form-group">
+            <label for="nom">Nom</label>
+            <input type="text" id="nom" name="nom" placeholder="Dupont" required />
+          </div>
+        </div>
+
+        <!-- Email -->
+        <div class="form-group">
+          <label for="email">Adresse email</label>
+          <input type="email" id="email" name="email" placeholder="marie.dupont@example.com" required />
+        </div>
+
+        <!-- Téléphone -->
+        <div class="form-group">
+          <label for="telephone">Téléphone</label>
+          <input type="tel" id="telephone" name="telephone" placeholder="+33 6 00 00 00 00" />
+        </div>
+
+        <!-- Objet -->
+        <div class="form-group">
+          <label for="objet">Objet de votre demande</label>
+          <div class="select-wrap">
+            <select id="objet" name="objet" required>
+              <option value="" disabled selected>Choisissez un objet…</option>
+              <option value="devis">Demande de devis</option>
+              <option value="rdv">Prise de rendez-vous</option>
+              <option value="rens">Renseignement</option>
+              <option value="mesure">Commande sur mesure</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Message -->
+        <div class="form-group">
+          <label for="message">Votre message</label>
+          <textarea id="message" name="message" rows="5"
+                    placeholder="Décrivez votre projet ou posez votre question…"></textarea>
+        </div>
+
+        <!-- Consentement -->
+        <label class="checkbox-group">
+          <input type="checkbox" name="consent" required />
+          <span>J'accepte d'être recontacté par Auréa pour ma demande.</span>
+        </label>
+
+        <!-- Submit -->
+        <button type="submit" class="btn-submit">Envoyer ma demande</button>
+      </form>
+
+      <!-- Message de confirmation (caché par défaut) -->
+      <div id="confirm-msg" role="alert" aria-live="polite">
+        <svg class="confirm-icon" viewBox="0 0 48 48" fill="none">
+          <circle cx="24" cy="24" r="22" stroke="#C9A84C" stroke-width="0.9" opacity="0.4"/>
+          <path d="M14 24 L21 31 L34 18" stroke="#C9A84C" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <p class="confirm-title">Message envoyé</p>
+        <p class="confirm-text">Merci, nous vous répondrons sous 48h.</p>
+      </div>
+    </div>
+
+  </section>
+
+  <!-- ============================================================
+       SECTION MAP
+  ============================================================ -->
+  <section id="map-section">
+    <div class="map-placeholder">
+      <p class="map-address">12 rue de la Paix · Paris 1<sup>er</sup></p>
+      <a href="https://www.google.com/maps/search/12+rue+de+la+Paix+Paris"
+         target="_blank" rel="noopener" class="map-link">Ouvrir dans Google Maps</a>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       FOOTER
+  ============================================================ -->
+  <footer>
+    <a href="index.html" class="footer-logo">AURÉA</a>
+    <ul class="footer-nav">
+      <li><a href="index.html">Maison</a></li>
+      <li><a href="collection.html">Collection</a></li>
+      <li><a href="index.html#savoir-faire">Savoir-faire</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 Auréa. Joaillerie d'exception.</p>
+  </footer>
+
+  <!-- ============================================================
+       JAVASCRIPT
+  ============================================================ -->
+  <script>
+  (function () {
+    'use strict';
+
+    /* ── Navbar ──────────────────────────────────────────── */
+    const navbar = document.getElementById('navbar');
+    function updateNavbar() {
+      navbar.classList.toggle('at-top', window.scrollY < 20);
+    }
+    window.addEventListener('scroll', updateNavbar, { passive: true });
+    updateNavbar();
+
+    /* ── IntersectionObserver ────────────────────────────── */
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach(e => {
+        if (e.isIntersecting) {
+          e.target.classList.add('visible');
+          io.unobserve(e.target);
+        }
+      });
+    }, { threshold: 0.1 });
+
+    document.querySelectorAll('.fade-up').forEach(el => io.observe(el));
+
+    /* ── Formulaire factice ──────────────────────────────── */
+    const form       = document.getElementById('contact-form');
+    const confirmMsg = document.getElementById('confirm-msg');
+
+    form.addEventListener('submit', (e) => {
+      e.preventDefault();
+
+      /* Validation minimale */
+      const prenom  = form.querySelector('#prenom').value.trim();
+      const email   = form.querySelector('#email').value.trim();
+      const objet   = form.querySelector('#objet').value;
+      const consent = form.querySelector('[name="consent"]').checked;
+
+      if (!prenom || !email || !objet || !consent) {
+        /* Mettre en évidence les champs vides */
+        [form.querySelector('#prenom'), form.querySelector('#email'), form.querySelector('#objet')].forEach(field => {
+          if (!field.value.trim()) field.style.borderColor = 'rgba(201,168,76,0.6)';
+        });
+        if (!consent) form.querySelector('[name="consent"]').parentElement.style.opacity = '1';
+        return;
+      }
+
+      /* Simuler l'envoi */
+      const btn = form.querySelector('.btn-submit');
+      btn.textContent = 'Envoi en cours…';
+      btn.disabled = true;
+
+      setTimeout(() => {
+        form.style.display = 'none';
+        confirmMsg.classList.add('visible');
+        /* Scroll doux vers la confirmation */
+        confirmMsg.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }, 800);
+    });
+
+    /* Réinitialiser la couleur des champs au focus */
+    form.querySelectorAll('input, select, textarea').forEach(field => {
+      field.addEventListener('focus', () => {
+        field.style.borderColor = '';
+      });
+    });
+
+  })();
+  </script>
+</body>
+</html>
