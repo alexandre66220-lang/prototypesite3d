@@ -3,106 +3,245 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Sculpture — Façonné dans la lumière</title>
+  <title>Auréa — La Joaillerie Céleste</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400;1,600&family=Montserrat:wght@300;400;500&display=swap" rel="stylesheet" />
+
   <style>
-    *, *::before, *::after {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
+    /* ─── Variables ──────────────────────────────────────── */
+    :root {
+      --gold:       #C9A84C;
+      --gold-light: #E8C96A;
+      --cream:      #FAF8F2;
+      --bg:         #080808;
+      --bg-sub:     #1a1a1a;
+      --serif:      'Cormorant Garamond', Georgia, serif;
+      --sans:       'Montserrat', sans-serif;
     }
 
-    :root {
-      --cream: #e8dcc8;
-      --bg: #080808;
-    }
+    /* ─── Reset ──────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html { scroll-behavior: smooth; }
 
     body {
       background: var(--bg);
       color: var(--cream);
-      font-family: Georgia, 'Times New Roman', serif;
+      font-family: var(--sans);
       overflow-x: hidden;
     }
 
-    /* Loading overlay */
-    #loading {
+    a { text-decoration: none; color: inherit; }
+
+    /* ─── Navbar ─────────────────────────────────────────── */
+    #navbar {
       position: fixed;
-      inset: 0;
-      background: var(--bg);
+      top: 0; left: 0; right: 0;
+      z-index: 100;
       display: flex;
       align-items: center;
-      justify-content: center;
-      z-index: 1000;
-      transition: opacity 0.9s ease;
+      justify-content: space-between;
+      padding: 1.4rem 3rem;
+      transition: background 0.45s ease, border-color 0.45s ease;
+      border-bottom: 1px solid transparent;
     }
-    #loading.hidden {
-      opacity: 0;
-      pointer-events: none;
-    }
-    .loader-ring {
-      width: 40px;
-      height: 40px;
-      border: 1.5px solid rgba(232, 220, 200, 0.12);
-      border-top-color: rgba(232, 220, 200, 0.65);
-      border-radius: 50%;
-      animation: spin 1.2s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    /* Hero — 400vh gives a full 360° rotation across the scroll */
-    #hero {
-      height: 400vh;
-      position: relative;
+    #navbar.scrolled {
+      background: var(--bg);
+      border-bottom-color: rgba(201, 168, 76, 0.25);
     }
 
-    /* Sticky viewport stays at top while user scrolls through hero */
-    #sticky {
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      width: 100%;
-      overflow: hidden;
+    .nav-list {
+      list-style: none;
+      display: flex;
+      gap: 2.5rem;
     }
+    .nav-list a {
+      font-family: var(--sans);
+      font-size: 0.62rem;
+      font-weight: 400;
+      letter-spacing: 0.22em;
+      text-transform: uppercase;
+      color: rgba(250, 248, 242, 0.55);
+      transition: color 0.3s;
+    }
+    .nav-list a:hover { color: var(--gold); }
 
-    /* Canvas fills the entire sticky viewport */
-    #three-canvas {
+    .nav-logo {
+      font-family: var(--serif);
+      font-size: 1.55rem;
+      font-weight: 300;
+      letter-spacing: 0.55em;
+      color: var(--gold);
+      text-transform: uppercase;
       position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      white-space: nowrap;
+    }
+
+    /* ─── Canvas (fixed, full-screen) ───────────────────── */
+    #three-canvas {
+      position: fixed;
       inset: 0;
       width: 100%;
       height: 100%;
       display: block;
+      z-index: 10;
+      opacity: 0;
+      pointer-events: none;
+      transition: none;
     }
 
-    /* Right-side gradient so text stays legible over the model */
-    #sticky::after {
+    /* ─── Hero ───────────────────────────────────────────── */
+    /*
+     * No z-index set here — avoids creating a stacking context
+     * that would trap children below the fixed canvas (z-10).
+     * The canvas is transparent (opacity:0) initially so the hero
+     * shows through it.
+     */
+    #hero {
+      position: relative;
+      height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background: linear-gradient(160deg, var(--bg) 0%, var(--bg-sub) 50%, var(--bg) 100%);
+      overflow: hidden;
+    }
+    #hero::before {
       content: '';
       position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse 60% 55% at 50% 45%, rgba(201,168,76,0.07) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    /* Fine decorative corner lines */
+    #hero::after {
+      content: '';
+      position: absolute;
+      inset: 3rem;
+      border: 1px solid rgba(201, 168, 76, 0.06);
+      pointer-events: none;
+    }
+
+    .hero-content {
+      text-align: center;
+      z-index: 1;
+      user-select: none;
+    }
+    .hero-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.58rem;
+      font-weight: 400;
+      letter-spacing: 0.45em;
+      text-transform: uppercase;
+      color: rgba(201, 168, 76, 0.5);
+      display: block;
+      margin-bottom: 1.8rem;
+    }
+    .hero-title {
+      font-family: var(--serif);
+      font-size: clamp(5rem, 11vw, 9.5rem);
+      font-weight: 300;
+      letter-spacing: 0.5em;
+      color: var(--gold);
+      line-height: 1;
+      text-transform: uppercase;
+    }
+    .hero-rule {
+      width: 38px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.35;
+      margin: 2rem auto;
+    }
+    .hero-subtitle {
+      font-family: var(--serif);
+      font-size: clamp(1rem, 1.8vw, 1.35rem);
+      font-weight: 300;
+      font-style: italic;
+      letter-spacing: 0.06em;
+      color: rgba(250, 248, 242, 0.6);
+    }
+
+    /* Scroll indicator */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.65rem;
+      pointer-events: none;
+    }
+    .scroll-hint span {
+      font-family: var(--sans);
+      font-size: 0.52rem;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: rgba(201, 168, 76, 0.38);
+    }
+    .scroll-hint-line {
+      width: 1px;
+      height: 42px;
+      background: linear-gradient(to bottom, rgba(201,168,76,0.55), transparent);
+      animation: hint-pulse 2.2s ease-in-out infinite;
+    }
+    @keyframes hint-pulse {
+      0%, 100% { transform: scaleY(0.7);  opacity: 0.25; }
+      50%       { transform: scaleY(1);    opacity: 0.75; }
+    }
+
+    /* ─── 3D Section ─────────────────────────────────────── */
+    /*
+     * No z-index on #scene-3d — avoids stacking context so that
+     * .scene-sticky (z-11) sits above the canvas (z-10) globally.
+     */
+    #scene-3d {
+      position: relative;
+      height: 500vh;
+    }
+
+    /* Sticky viewport for text overlays */
+    .scene-sticky {
+      position: sticky;
       top: 0;
-      right: 0;
-      width: 50%;
+      height: 100vh;
+      z-index: 11;
+      pointer-events: none;
+    }
+
+    /* Right-side gradient for text legibility */
+    .scene-sticky::after {
+      content: '';
+      position: absolute;
+      top: 0; right: 0;
+      width: 46%;
       height: 100%;
       background: linear-gradient(
         to left,
-        rgba(8, 8, 8, 0.8) 0%,
-        rgba(8, 8, 8, 0.25) 55%,
+        rgba(8,8,8,0.72) 0%,
+        rgba(8,8,8,0.2) 55%,
         transparent 100%
       );
       pointer-events: none;
-      z-index: 1;
     }
 
-    /* Text panel — right side, vertically centered */
-    #text-panel {
+    /* Face text panel */
+    .face-panel {
       position: absolute;
-      right: 8%;
+      right: 7%;
       top: 50%;
       transform: translateY(-50%);
-      width: min(300px, 28vw);
+      width: min(280px, 26vw);
       height: 9rem;
-      z-index: 2;
-      pointer-events: none;
+      z-index: 1;
     }
-
-    /* All face texts stack in the panel; only .active is visible */
     .face-text {
       position: absolute;
       inset: 0;
@@ -112,283 +251,662 @@
       justify-content: center;
       gap: 0.65rem;
       opacity: 0;
-      transition: opacity 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+      transition: opacity 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .face-text.active {
-      opacity: 1;
-    }
-
-    .face-text .label {
-      font-size: 0.6rem;
-      letter-spacing: 0.3em;
+    .face-text.active { opacity: 1; }
+    .face-num {
+      font-family: var(--sans);
+      font-size: 0.54rem;
+      letter-spacing: 0.4em;
       text-transform: uppercase;
-      color: rgba(232, 220, 200, 0.35);
+      color: rgba(201, 168, 76, 0.32);
     }
-
-    .face-text h2 {
-      font-size: clamp(1.05rem, 1.65vw, 1.5rem);
+    .face-text h3 {
+      font-family: var(--serif);
+      font-size: clamp(1.1rem, 1.65vw, 1.5rem);
       font-weight: 300;
       font-style: italic;
       line-height: 1.55;
-      letter-spacing: 0.02em;
       color: var(--cream);
       text-align: right;
     }
 
-    /* Scroll hint */
-    #scroll-hint {
+    /* Left progress dots */
+    .progress-dots {
       position: absolute;
-      bottom: 2.5rem;
-      left: 50%;
-      transform: translateX(-50%);
+      left: 5%;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 0.75rem;
+      align-items: center;
+      z-index: 1;
+    }
+    .dot {
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: rgba(201, 168, 76, 0.2);
+      transition: background 0.5s, transform 0.5s;
+    }
+    .dot.active {
+      background: var(--gold);
+      transform: scale(1.5);
+    }
+
+    /* ─── Shared section chrome ───────────────────────────── */
+    /*
+     * z-index: 11 + background: var(--bg) means these sections
+     * slide over the fixed canvas as the user scrolls down.
+     */
+    .above-canvas {
+      position: relative;
+      z-index: 11;
+      background: var(--bg);
+    }
+
+    .section-eyebrow {
+      font-family: var(--sans);
+      font-size: 0.58rem;
+      letter-spacing: 0.42em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.65;
+      display: block;
+      margin-bottom: 1.1rem;
+    }
+    .section-title {
+      font-family: var(--serif);
+      font-size: clamp(2.2rem, 4.5vw, 3.8rem);
+      font-weight: 300;
+      letter-spacing: 0.08em;
+      color: var(--cream);
+      line-height: 1.1;
+    }
+    .section-rule {
+      width: 34px;
+      height: 1px;
+      background: var(--gold);
+      opacity: 0.42;
+      margin-top: 1.6rem;
+    }
+
+    /* ─── Collections ────────────────────────────────────── */
+    #collections {
+      padding: 9rem 6% 8rem;
+      border-top: 1px solid rgba(201, 168, 76, 0.07);
+    }
+    .collections-header {
+      text-align: center;
+      margin-bottom: 5rem;
+    }
+    .collections-header .section-rule { margin: 1.6rem auto 0; }
+
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 2rem;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .card {
+      cursor: default;
+    }
+    .card-image {
+      aspect-ratio: 3 / 4;
+      position: relative;
+      overflow: hidden;
+      margin-bottom: 1.5rem;
+      background: var(--bg-sub);
+    }
+    .card-image::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      border: 1px solid rgba(201, 168, 76, 0);
+      transition: border-color 0.45s;
+    }
+    .card:hover .card-image::after { border-color: rgba(201, 168, 76, 0.28); }
+
+    /* Subtle inner glow on hover */
+    .card-glow {
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 50%, rgba(201,168,76,0.1), transparent 65%);
+      opacity: 0;
+      transition: opacity 0.5s;
+    }
+    .card:hover .card-glow { opacity: 1; }
+
+    /* Placeholder artwork */
+    .card-art {
+      position: absolute;
+      inset: 0;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 0.6rem;
-      z-index: 2;
-      pointer-events: none;
-      transition: opacity 0.6s ease;
+      justify-content: center;
+      gap: 1rem;
     }
-    #scroll-hint.gone {
-      opacity: 0;
+    .card-art-ring {
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, 0.22);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: border-color 0.4s;
     }
-    #scroll-hint span {
-      font-size: 0.58rem;
-      letter-spacing: 0.32em;
-      text-transform: uppercase;
-      color: rgba(232, 220, 200, 0.32);
+    .card:hover .card-art-ring { border-color: rgba(201, 168, 76, 0.45); }
+    .card-art-gem {
+      border-radius: 50%;
+      background: radial-gradient(circle at 38% 35%, rgba(232,201,106,0.35), transparent 60%);
+      border: 1px solid rgba(201, 168, 76, 0.38);
     }
-    .scroll-line {
-      width: 1px;
-      height: 36px;
-      background: linear-gradient(to bottom, rgba(232, 220, 200, 0.5), transparent);
-      animation: breathe 2s ease-in-out infinite;
-    }
-    @keyframes breathe {
-      0%, 100% { opacity: 0.2;  transform: scaleY(0.8); }
-      50%       { opacity: 0.9; transform: scaleY(1); }
+    .card-art-index {
+      font-family: var(--sans);
+      font-size: 0.5rem;
+      letter-spacing: 0.42em;
+      color: rgba(201, 168, 76, 0.28);
     }
 
-    /* ─── Mobile ≤ 1023px ─────────────────────────────── */
-    @media (max-width: 1023px) {
-      #hero {
-        height: auto;
-      }
-      #sticky {
-        position: relative;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        padding: 3.5rem 1.5rem 4.5rem;
-        gap: 2.5rem;
-        overflow: visible;
-      }
-      #sticky::after {
-        display: none;
-      }
-      #three-canvas {
-        position: relative;
-        inset: auto;
-        width: 100%;
-        height: min(80vw, 440px);
-        flex-shrink: 0;
-      }
-      #text-panel {
-        position: static;
-        transform: none;
-        width: 100%;
-        height: auto;
-        display: flex;
-        flex-direction: column;
-        gap: 0;
-      }
-      .face-text {
-        position: static;
-        opacity: 1 !important;
-        align-items: center;
-        padding: 1.3rem 0;
-        border-bottom: 1px solid rgba(232, 220, 200, 0.07);
-      }
-      .face-text:last-child {
-        border-bottom: none;
-      }
-      .face-text h2 {
-        text-align: center;
-        font-size: clamp(0.9rem, 3.5vw, 1.15rem);
-      }
-      .face-text .label {
-        display: none;
-      }
-      #scroll-hint {
-        display: none;
-      }
+    .card-meta {
+      font-family: var(--sans);
+      font-size: 0.57rem;
+      font-weight: 300;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: rgba(250, 248, 242, 0.3);
+      margin-bottom: 0.4rem;
+    }
+    .card-name {
+      font-family: var(--serif);
+      font-size: 1.35rem;
+      font-weight: 400;
+      letter-spacing: 0.08em;
+      color: var(--cream);
+    }
+    .card-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      margin-top: 0.9rem;
+      font-family: var(--sans);
+      font-size: 0.56rem;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0;
+      transform: translateY(5px);
+      transition: opacity 0.4s, transform 0.4s;
+    }
+    .card-cta::after { content: '→'; font-size: 0.75rem; }
+    .card:hover .card-cta { opacity: 1; transform: translateY(0); }
+
+    /* ─── Savoir-Faire ───────────────────────────────────── */
+    #savoir-faire {
+      padding: 9rem 6% 9rem;
+      border-top: 1px solid rgba(201, 168, 76, 0.07);
+    }
+    .sf-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 6rem;
+      max-width: 1080px;
+      margin: 0 auto;
+      align-items: center;
+    }
+    .sf-text .section-rule { margin-left: 0; }
+    .sf-header { margin-bottom: 2.5rem; }
+    .sf-body {
+      font-family: var(--serif);
+      font-size: 1.08rem;
+      font-weight: 300;
+      line-height: 1.9;
+      color: rgba(250, 248, 242, 0.58);
+    }
+    .sf-body p + p { margin-top: 1.1rem; }
+
+    /* Decorative circular emblem */
+    .sf-emblem {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .emblem-outer {
+      width: 320px;
+      height: 320px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, 0.16);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+    .emblem-mid {
+      width: 210px;
+      height: 210px;
+      border-radius: 50%;
+      border: 1px solid rgba(201, 168, 76, 0.1);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: radial-gradient(circle at 38% 34%, rgba(201,168,76,0.05), transparent 65%);
+    }
+    .emblem-letter {
+      font-family: var(--serif);
+      font-size: 4.5rem;
+      font-weight: 300;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      opacity: 0.3;
+    }
+    /* Small decorative ticks around the outer circle */
+    .emblem-tick {
+      position: absolute;
+      background: rgba(201, 168, 76, 0.22);
+    }
+    .emblem-tick.h { width: 18px; height: 1px; }
+    .emblem-tick.v { width: 1px;  height: 18px; }
+    .emblem-tick.top    { top: -12px; left: 50%; transform: translateX(-50%); }
+    .emblem-tick.bottom { bottom: -12px; left: 50%; transform: translateX(-50%); }
+    .emblem-tick.left   { left: -12px; top: 50%; transform: translateY(-50%); }
+    .emblem-tick.right  { right: -12px; top: 50%; transform: translateY(-50%); }
+
+    /* ─── Contact / Footer ──────────────────────────────── */
+    #contact {
+      padding: 7rem 6% 4rem;
+      border-top: 1px solid rgba(201, 168, 76, 0.07);
+      text-align: center;
+    }
+    .contact-logo {
+      font-family: var(--serif);
+      font-size: 2rem;
+      font-weight: 300;
+      letter-spacing: 0.65em;
+      color: var(--gold);
+      margin-bottom: 1.2rem;
+    }
+    .contact-tagline {
+      font-family: var(--serif);
+      font-size: 1.05rem;
+      font-style: italic;
+      color: rgba(250, 248, 242, 0.38);
+      margin-bottom: 3rem;
+    }
+    .contact-email {
+      display: block;
+      font-family: var(--sans);
+      font-size: 0.63rem;
+      letter-spacing: 0.25em;
+      color: var(--gold);
+      opacity: 0.75;
+      margin-bottom: 0.7rem;
+      transition: opacity 0.3s;
+    }
+    .contact-email:hover { opacity: 1; }
+    .contact-addr {
+      font-family: var(--sans);
+      font-size: 0.58rem;
+      letter-spacing: 0.12em;
+      color: rgba(250, 248, 242, 0.25);
+      line-height: 1.9;
+    }
+    .footer-rule {
+      width: 100%;
+      height: 1px;
+      background: rgba(201, 168, 76, 0.07);
+      margin: 3.5rem 0 1.5rem;
+    }
+    .footer-bottom {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+    .footer-copy {
+      font-family: var(--sans);
+      font-size: 0.52rem;
+      letter-spacing: 0.15em;
+      color: rgba(250, 248, 242, 0.18);
+    }
+    .footer-links {
+      display: flex;
+      gap: 2rem;
+    }
+    .footer-links a {
+      font-family: var(--sans);
+      font-size: 0.52rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: rgba(250, 248, 242, 0.18);
+      transition: color 0.3s;
+    }
+    .footer-links a:hover { color: var(--gold); }
+
+    /* ─── Scroll reveal ──────────────────────────────────── */
+    .reveal {
+      opacity: 0;
+      transform: translateY(22px);
+      transition: opacity 0.85s ease, transform 0.85s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── Responsive ─────────────────────────────────────── */
+    @media (max-width: 900px) {
+      .collections-grid { grid-template-columns: 1fr 1fr; }
+      .sf-grid { grid-template-columns: 1fr; gap: 3rem; }
+      .sf-emblem { display: none; }
+      .face-panel { width: min(240px, 40vw); right: 4%; }
+    }
+    @media (max-width: 600px) {
+      .collections-grid { grid-template-columns: 1fr; max-width: 340px; }
+      #navbar { padding: 1.2rem 1.5rem; }
+      .nav-list:first-child li:nth-child(3) { display: none; }
     }
   </style>
 </head>
 <body>
 
-  <div id="loading"><div class="loader-ring"></div></div>
+  <!-- ── Navbar ──────────────────────────────────────────── -->
+  <nav id="navbar">
+    <ul class="nav-list">
+      <li><a href="#hero">Maison</a></li>
+      <li><a href="#collections">Collection</a></li>
+      <li><a href="#savoir-faire">Savoir-Faire</a></li>
+    </ul>
+    <div class="nav-logo">Auréa</div>
+    <ul class="nav-list">
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
 
+  <!-- ── Three.js Canvas (fixed, full-screen) ───────────── -->
+  <canvas id="three-canvas"></canvas>
+
+  <!-- ── Section 1: Hero ───────────────────────────────── -->
   <section id="hero">
-    <div id="sticky">
-      <canvas id="three-canvas"></canvas>
+    <div class="hero-content">
+      <span class="hero-eyebrow">Joaillerie — Paris</span>
+      <h1 class="hero-title">Auréa</h1>
+      <div class="hero-rule"></div>
+      <p class="hero-subtitle">La joaillerie céleste</p>
+    </div>
+    <div class="scroll-hint">
+      <span>Défiler</span>
+      <div class="scroll-hint-line"></div>
+    </div>
+  </section>
 
-      <div id="text-panel">
-        <div class="face-text active" data-face="0">
-          <span class="label">I</span>
-          <h2>Façonné dans&nbsp;la&nbsp;lumière</h2>
+  <!-- ── Section 2: Scroll-driven 3D (500vh) ───────────── -->
+  <section id="scene-3d">
+    <div class="scene-sticky">
+      <!-- Face text panel — right side -->
+      <div class="face-panel">
+        <div class="face-text active">
+          <span class="face-num">I</span>
+          <h3>L'éternité façonnée</h3>
         </div>
-        <div class="face-text" data-face="1">
-          <span class="label">II</span>
-          <h2>Chaque détail raconte une&nbsp;histoire</h2>
+        <div class="face-text">
+          <span class="face-num">II</span>
+          <h3>Chaque pierre,<br>une âme</h3>
         </div>
-        <div class="face-text" data-face="2">
-          <span class="label">III</span>
-          <h2>L'art prend vie entre vos&nbsp;mains</h2>
+        <div class="face-text">
+          <span class="face-num">III</span>
+          <h3>L'or comme langage</h3>
         </div>
-        <div class="face-text" data-face="3">
-          <span class="label">IV</span>
-          <h2>Une&nbsp;oeuvre, une&nbsp;émotion</h2>
+        <div class="face-text">
+          <span class="face-num">IV</span>
+          <h3>Votre histoire,<br>notre art</h3>
         </div>
       </div>
 
-      <div id="scroll-hint">
-        <span>Défiler</span>
-        <div class="scroll-line"></div>
+      <!-- Progress dots — left side -->
+      <div class="progress-dots">
+        <div class="dot active"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
+        <div class="dot"></div>
       </div>
     </div>
   </section>
 
-  <script type="importmap">
-  {
-    "imports": {
-      "three": "https://cdn.jsdelivr.net/npm/three@0.170.0/build/three.module.js",
-      "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.170.0/examples/jsm/"
-    }
-  }
-  </script>
+  <!-- ── Section 3: Collections ────────────────────────── -->
+  <section id="collections" class="above-canvas">
+    <div class="collections-header reveal">
+      <span class="section-eyebrow">Nos Créations</span>
+      <h2 class="section-title">Collection</h2>
+      <div class="section-rule"></div>
+    </div>
 
-  <script type="module">
-    import * as THREE from 'three';
-    import { GLTFLoader }      from 'three/addons/loaders/GLTFLoader.js';
-    import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+    <div class="collections-grid">
+      <div class="card reveal">
+        <div class="card-image"
+             style="background: linear-gradient(150deg, #141414, #1c1a14);">
+          <div class="card-glow"></div>
+          <div class="card-art">
+            <div class="card-art-ring" style="width:90px;height:90px;">
+              <div class="card-art-gem" style="width:44px;height:44px;"></div>
+            </div>
+            <span class="card-art-index">01</span>
+          </div>
+        </div>
+        <p class="card-meta">Bagues</p>
+        <h3 class="card-name">Solstice</h3>
+        <a href="#" class="card-cta">Découvrir</a>
+      </div>
 
-    const IS_DESKTOP = window.matchMedia('(min-width: 1024px)').matches;
+      <div class="card reveal" style="transition-delay: 0.13s">
+        <div class="card-image"
+             style="background: linear-gradient(150deg, #121214, #1a1820);">
+          <div class="card-glow"></div>
+          <div class="card-art">
+            <div class="card-art-ring" style="width:70px;height:110px;border-radius:35px;">
+              <div class="card-art-gem" style="width:24px;height:24px;"></div>
+            </div>
+            <span class="card-art-index">02</span>
+          </div>
+        </div>
+        <p class="card-meta">Colliers</p>
+        <h3 class="card-name">Équinoxe</h3>
+        <a href="#" class="card-cta">Découvrir</a>
+      </div>
 
-    /* ── Renderer ──────────────────────────────────────── */
-    const canvas = document.getElementById('three-canvas');
+      <div class="card reveal" style="transition-delay: 0.26s">
+        <div class="card-image"
+             style="background: linear-gradient(150deg, #141210, #1e1a12);">
+          <div class="card-glow"></div>
+          <div class="card-art">
+            <div style="display:flex;gap:20px;">
+              <div class="card-art-ring" style="width:38px;height:60px;border-radius:19px;">
+                <div class="card-art-gem" style="width:14px;height:14px;"></div>
+              </div>
+              <div class="card-art-ring" style="width:38px;height:60px;border-radius:19px;">
+                <div class="card-art-gem" style="width:14px;height:14px;"></div>
+              </div>
+            </div>
+            <span class="card-art-index">03</span>
+          </div>
+        </div>
+        <p class="card-meta">Boucles d'oreilles</p>
+        <h3 class="card-name">Aube</h3>
+        <a href="#" class="card-cta">Découvrir</a>
+      </div>
+    </div>
+  </section>
 
-    const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+  <!-- ── Section 4: Savoir-Faire ───────────────────────── -->
+  <section id="savoir-faire" class="above-canvas">
+    <div class="sf-grid">
+      <div class="sf-text reveal">
+        <div class="sf-header">
+          <span class="section-eyebrow">Notre Philosophie</span>
+          <h2 class="section-title">Savoir-Faire</h2>
+          <div class="section-rule"></div>
+        </div>
+        <div class="sf-body">
+          <p>Chaque pièce Auréa naît d'un dialogue entre la tradition joaillière française et une sensibilité contemporaine. Nos artisans, formés aux plus grandes maisons, perpétuent des gestes ancestraux avec une précision absolue.</p>
+          <p>De la sélection des gemmes brutes à la finition de chaque monture, nous n'acceptons que l'excellence. L'or est façonné à la main, serti avec soin, poli jusqu'à capturer la lumière elle-même.</p>
+          <p>Auréa, c'est la promesse d'une pièce unique — conçue pour traverser les générations.</p>
+        </div>
+      </div>
+      <div class="sf-emblem reveal" style="transition-delay: 0.2s">
+        <div class="emblem-outer">
+          <div class="emblem-tick h top"></div>
+          <div class="emblem-tick h bottom"></div>
+          <div class="emblem-tick v left"></div>
+          <div class="emblem-tick v right"></div>
+          <div class="emblem-mid">
+            <span class="emblem-letter">A</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Footer / Contact ──────────────────────────────── -->
+  <footer id="contact" class="above-canvas">
+    <div class="reveal">
+      <div class="contact-logo">Auréa</div>
+      <p class="contact-tagline">La joaillerie céleste</p>
+      <a href="mailto:contact@aurea-joaillerie.fr" class="contact-email">
+        contact@aurea-joaillerie.fr
+      </a>
+      <p class="contact-addr">
+        24 Rue de la Paix, 75002 Paris<br>
+        Sur rendez-vous uniquement
+      </p>
+    </div>
+    <div class="footer-rule"></div>
+    <div class="footer-bottom">
+      <span class="footer-copy">© 2025 Auréa. Tous droits réservés.</span>
+      <div class="footer-links">
+        <a href="#">Mentions légales</a>
+        <a href="#">Confidentialité</a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- ── Three.js r128 via CDN ──────────────────────────── -->
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/loaders/GLTFLoader.js"></script>
+
+  <script>
+    /* ── Renderer ────────────────────────────────────────── */
+    var canvas3d = document.getElementById('three-canvas');
+
+    var renderer = new THREE.WebGLRenderer({
+      canvas: canvas3d,
+      antialias: true,
+      alpha: true,
+    });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    renderer.outputColorSpace      = THREE.SRGBColorSpace;
-    renderer.toneMapping           = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure   = 1.25;
+    renderer.outputEncoding     = THREE.sRGBEncoding;
+    renderer.toneMapping        = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.25;
 
-    /* ── Scene ─────────────────────────────────────────── */
-    const scene = new THREE.Scene();
-
-    // Environment map — gives subtle ambient reflections to the material
-    const pmrem = new THREE.PMREMGenerator(renderer);
-    scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
-    pmrem.dispose();
-
-    /* ── Camera ────────────────────────────────────────── */
-    const camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
+    /* ── Scene & Camera ──────────────────────────────────── */
+    var scene  = new THREE.Scene();
+    var camera = new THREE.PerspectiveCamera(42, 1, 0.01, 100);
     camera.position.set(0, 0, 3.5);
 
-    /* ── Lighting ──────────────────────────────────────── */
-    // Soft ambient fill
-    scene.add(new THREE.AmbientLight(0xfff4e6, 0.3));
+    /* ── Lighting ────────────────────────────────────────── */
+    // Ambient — soft fill
+    scene.add(new THREE.AmbientLight(0xffffff, 0.28));
 
-    // Key light — front, slightly above-right
-    const key = new THREE.DirectionalLight(0xffeed8, 2.8);
-    key.position.set(2, 3, 4);
-    scene.add(key);
+    // Key — warm, front-right-above
+    var keyLight = new THREE.DirectionalLight(0xffeed8, 2.8);
+    keyLight.position.set(2, 3, 4);
+    scene.add(keyLight);
 
-    // Fill light — cooler, left side
-    const fill = new THREE.DirectionalLight(0xdce8ff, 0.5);
-    fill.position.set(-3, 0.5, 2);
-    scene.add(fill);
+    // Fill — cool, left
+    var fillLight = new THREE.DirectionalLight(0xdce8ff, 0.5);
+    fillLight.position.set(-3, 0.5, 2);
+    scene.add(fillLight);
 
-    // Rim light — behind model, gives silhouette depth
-    const rim = new THREE.DirectionalLight(0xaabbdd, 1.3);
-    rim.position.set(-1.5, 2, -4);
-    scene.add(rim);
+    // Rim — golden tint, behind — gives silhouette separation
+    var rimLight = new THREE.DirectionalLight(0xc9a84c, 1.1);
+    rimLight.position.set(-1.5, 2, -4);
+    scene.add(rimLight);
 
-    /* ── Load GLB ──────────────────────────────────────── */
-    let model = null;
-    const loadingEl = document.getElementById('loading');
+    /* ── Load model ──────────────────────────────────────── */
+    var model = null;
 
-    function onModelReady() {
-      loadingEl.classList.add('hidden');
-    }
-
-    new GLTFLoader().load(
-      './angel_bust.glb',
-      (gltf) => {
+    new THREE.GLTFLoader().load(
+      './angel-bust.glb',
+      function (gltf) {
         model = gltf.scene;
 
-        // Normalize size and center at origin
-        const box    = new THREE.Box3().setFromObject(model);
-        const center = box.getCenter(new THREE.Vector3());
-        const size   = box.getSize(new THREE.Vector3());
-        const scale  = 1.8 / Math.max(size.x, size.y, size.z);
+        var box    = new THREE.Box3().setFromObject(model);
+        var center = box.getCenter(new THREE.Vector3());
+        var size   = box.getSize(new THREE.Vector3());
+        var scale  = 1.8 / Math.max(size.x, size.y, size.z);
 
         model.scale.setScalar(scale);
         model.position.set(
-          -center.x * scale + (IS_DESKTOP ? -0.22 : 0),
+          -center.x * scale - 0.2,   // slight left offset for text room
           -center.y * scale,
           -center.z * scale
         );
-
         scene.add(model);
-        onModelReady();
       },
       undefined,
-      (err) => {
-        // Fallback placeholder when GLB is absent
-        console.warn('GLB not found — showing placeholder:', err.message);
-        const geo = new THREE.TorusKnotGeometry(0.55, 0.18, 160, 32);
-        const mat = new THREE.MeshStandardMaterial({
-          color: 0xc4a06a,
-          metalness: 0.15,
-          roughness: 0.55,
-        });
-        model = new THREE.Mesh(geo, mat);
+      function (err) {
+        console.warn('angel-bust.glb not found — placeholder shown:', err.message);
+        model = new THREE.Mesh(
+          new THREE.TorusKnotGeometry(0.55, 0.18, 160, 32),
+          new THREE.MeshStandardMaterial({ color: 0xC9A84C, metalness: 0.4, roughness: 0.35 })
+        );
         scene.add(model);
-        onModelReady();
       }
     );
 
-    /* ── Scroll → rotation ─────────────────────────────── */
-    let targetY  = 0;
-    let currentY = 0;
-    const LERP   = 0.07; // smoothing factor (~60fps)
+    /* ── DOM refs ────────────────────────────────────────── */
+    var navbar      = document.getElementById('navbar');
+    var heroEl      = document.getElementById('hero');
+    var heroContent = heroEl.querySelector('.hero-content');
+    var scrollHint  = heroEl.querySelector('.scroll-hint');
+    var scene3dEl   = document.getElementById('scene-3d');
+    var faceEls     = document.querySelectorAll('.face-text');
+    var dotEls      = document.querySelectorAll('.dot');
 
+    /* ── State ───────────────────────────────────────────── */
+    var targetY    = 0;
+    var currentY   = 0;
+    var LERP       = 0.07;
+    var activeFace = 0;
+
+    /* ── Scroll handler ──────────────────────────────────── */
     function onScroll() {
-      const hero = document.getElementById('hero');
-      const raw  = window.scrollY - hero.offsetTop;
-      const max  = hero.offsetHeight - window.innerHeight;
-      const p    = Math.max(0, Math.min(1, raw / max));
+      var sy = window.scrollY;
+      var vh = window.innerHeight;
 
-      targetY = p * Math.PI * 2; // 0 → full 360°
+      // Navbar style
+      navbar.classList.toggle('scrolled', sy > 60);
 
-      document.getElementById('scroll-hint')
-        .classList.toggle('gone', p > 0.015);
+      // Hero → canvas cross-fade (0 → 10% of viewport height)
+      var t = Math.min(1, sy / (vh * 0.10));
+      canvas3d.style.opacity         = t;
+      heroContent.style.opacity      = 1 - t;
+      scrollHint.style.opacity       = Math.max(0, 1 - t * 4);
+
+      // 3D rotation progress within #scene-3d
+      var sceneTop = scene3dEl.offsetTop;
+      var sceneH   = scene3dEl.offsetHeight;
+      var progress = Math.max(0, Math.min(1, (sy - sceneTop) / (sceneH - vh)));
+      targetY = progress * Math.PI * 2;
     }
 
-    if (IS_DESKTOP) {
-      window.addEventListener('scroll', onScroll, { passive: true });
-    }
+    window.addEventListener('scroll', onScroll, { passive: true });
 
-    /* ── Face text switching ───────────────────────────── */
-    const faceEls  = document.querySelectorAll('.face-text');
-    let activeFace = 0;
-
+    /* ── Face switching ──────────────────────────────────── */
     function getFace(ry) {
-      const d = (((ry * 180 / Math.PI) % 360) + 360) % 360;
-      // 0° ±45° → face 0, 90° ±45° → face 1, etc.
+      var d = (((ry * 180 / Math.PI) % 360) + 360) % 360;
       if (d < 45 || d >= 315) return 0;
       if (d < 135) return 1;
       if (d < 225) return 2;
@@ -398,40 +916,46 @@
     function setFace(f) {
       if (f === activeFace) return;
       activeFace = f;
-      faceEls.forEach((el, i) => el.classList.toggle('active', i === f));
+      faceEls.forEach(function (el, i) { el.classList.toggle('active', i === f); });
+      dotEls.forEach(function (el, i)  { el.classList.toggle('active', i === f); });
     }
 
-    /* ── Resize ────────────────────────────────────────── */
+    /* ── Resize ──────────────────────────────────────────── */
     function resize() {
-      const rect = canvas.getBoundingClientRect();
-      const w = Math.round(rect.width);
-      const h = Math.round(rect.height);
-      if (!w || !h) return;
+      var w = window.innerWidth;
+      var h = window.innerHeight;
       renderer.setSize(w, h, false);
       camera.aspect = w / h;
       camera.updateProjectionMatrix();
     }
 
-    new ResizeObserver(resize).observe(canvas);
+    window.addEventListener('resize', resize);
     resize();
 
-    /* ── Render loop ───────────────────────────────────── */
+    /* ── Render loop ─────────────────────────────────────── */
     function animate() {
       requestAnimationFrame(animate);
-
-      if (IS_DESKTOP) {
-        currentY += (targetY - currentY) * LERP;
-      }
-
+      currentY += (targetY - currentY) * LERP;
       if (model) {
         model.rotation.y = currentY;
-        if (IS_DESKTOP) setFace(getFace(currentY));
+        setFace(getFace(currentY));
       }
-
       renderer.render(scene, camera);
     }
 
     animate();
+
+    /* ── Scroll-reveal for content sections ──────────────── */
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (entry) {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+          io.unobserve(entry.target);
+        }
+      });
+    }, { threshold: 0.12 });
+
+    document.querySelectorAll('.reveal').forEach(function (el) { io.observe(el); });
   </script>
 </body>
 </html>
