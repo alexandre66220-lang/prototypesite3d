@@ -210,18 +210,6 @@
       100% { transform: scaleY(1);   opacity: 0; }
     }
 
-    /* Canvas hero (overlay lors de la transition) */
-    #hero-canvas {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
-      display: block;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.6s var(--ease);
-    }
-
     /* ============================================================
        SECTION 2 — SCROLL-DRIVEN 3D
     ============================================================ */
@@ -666,14 +654,10 @@
       <p class="hero-baseline">La joaillerie céleste</p>
     </div>
 
-    <!-- Indicateur scroll (dans hero-bg pour qu'il soit sur le fond) -->
     <div id="scroll-cue">
       <span>Découvrir</span>
       <div class="cue-line"></div>
     </div>
-
-    <!-- Canvas overlay (s'estompe lors de la transition) -->
-    <canvas id="hero-canvas"></canvas>
   </section>
 
   <!-- ============================================================
@@ -1034,57 +1018,18 @@
 
     function onScroll3D() {
       const p = getProgress3D();
-      targetRotY   = p * Math.PI * 4;                          // 2 tours
+      targetRotY   = p * Math.PI * 4;
       targetScale  = p > 0.9 ? lerp(1, 0.7, (p - 0.9) / 0.1) : 1;
       updateMsgs(p);
     }
 
-    /* ── Hero transition ───────────────────────────────── */
-    const heroBg     = document.getElementById('hero-bg');
-    const heroCanvas = document.getElementById('hero-canvas');
-    const scrollCue  = document.getElementById('scroll-cue');
-
-    let heroOpacity     = 0;
-    let heroSceneReady  = false;
-    let heroRenderer    = null;
-    let heroScene       = null;
-    let heroCamera      = null;
-    let heroModel       = null;
-
-    function initHeroScene() {
-      if (heroSceneReady) return;
-      heroSceneReady = true;
-
-      heroRenderer = new THREE.WebGLRenderer({ canvas: heroCanvas, antialias: true, alpha: true });
-      heroRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      heroRenderer.toneMapping = THREE.ACESFilmicToneMapping;
-      heroRenderer.toneMappingExposure = 1.2;
-      heroRenderer.setSize(window.innerWidth, window.innerHeight);
-
-      heroScene  = new THREE.Scene();
-      heroCamera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.01, 100);
-      heroCamera.position.set(0, 0, 5);
-
-      heroScene.add(new THREE.AmbientLight(0xffffff, 0.3));
-      const dl = new THREE.DirectionalLight(0xffffff, 1.5); dl.position.set(0,2,4); heroScene.add(dl);
-      const pl = new THREE.PointLight(0xC9A84C, 1.0, 20);   pl.position.set(3,1,2); heroScene.add(pl);
-      const rl = new THREE.DirectionalLight(0xffffff, 0.5);  rl.position.set(0,0,-5); heroScene.add(rl);
-
-      if (mainModel) {
-        heroModel = mainModel.clone();
-        heroScene.add(heroModel);
-      }
-    }
+    /* ── Hero transition (fade uniquement, sans canvas 3D) ── */
+    const heroBg    = document.getElementById('hero-bg');
+    const scrollCue = document.getElementById('scroll-cue');
 
     function onScrollHero() {
       const heroH = document.getElementById('hero').offsetHeight;
       const p = clamp(window.scrollY / (heroH * 0.08), 0, 1);
-
-      if (p > 0 && !heroSceneReady) initHeroScene();
-
-      heroOpacity = p;
-      heroCanvas.style.opacity = p;
-
       heroBg.classList.toggle('fade-out', p >= 1);
       scrollCue.style.opacity = String(1 - p * 3);
     }
@@ -1096,13 +1041,6 @@
 
     window.addEventListener('scroll', onScrollAll, { passive: true });
 
-    window.addEventListener('resize', () => {
-      if (!heroRenderer) return;
-      heroRenderer.setSize(window.innerWidth, window.innerHeight);
-      heroCamera.aspect = window.innerWidth / window.innerHeight;
-      heroCamera.updateProjectionMatrix();
-    });
-
     /* ── Boucle de rendu ───────────────────────────────── */
     let clock = 0;
 
@@ -1110,7 +1048,6 @@
       requestAnimationFrame(animate);
       clock += 0.005;
 
-      /* Scène principale */
       if (mainModel) {
         currentRotY  = lerp(currentRotY,  targetRotY,  0.06);
         currentScale = lerp(currentScale, targetScale, 0.05);
@@ -1120,13 +1057,6 @@
         mainModel.position.y = Math.sin(clock) * 0.04;
       }
       mainRenderer.render(mainScene, mainCamera);
-
-      /* Scène hero */
-      if (heroRenderer && heroModel) {
-        heroModel.rotation.y += 0.003;
-        heroModel.position.y  = Math.sin(clock * 1.2) * 0.03;
-        heroRenderer.render(heroScene, heroCamera);
-      }
     }
 
     animate();
