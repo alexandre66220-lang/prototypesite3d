@@ -621,7 +621,12 @@
     ============================================================ */
     @media (max-width: 767px) {
 
-      /* --- Hero : réduire espacement lettres et taille de fonte --- */
+      /* --- Hero : décaler le contenu sous la navbar fixe (72px) --- */
+      #hero-bg {
+        justify-content: flex-start;
+        padding-top: calc(72px + 10vh);
+      }
+
       .hero-wordmark {
         font-size: clamp(2.2rem, 13vw, 3.4rem);
         letter-spacing: 0.15em;
@@ -635,35 +640,44 @@
         text-align: center;
       }
 
-      /* --- Section 3D : abandon du scroll-driven, mise en page colonne --- */
+      /* --- Section 3D : canvas statique + messages en colonne sous lui --- */
       #section-3d {
         height: auto;
       }
 
+      /* sticky-stage devient un flex column : canvas puis messages */
       .sticky-stage {
-        position: relative;   /* supprime le sticky */
-        height: 52vw;
-        min-height: 240px;
-        max-height: 44vh;
-        overflow: hidden;
-        display: block;
+        position: relative;
+        height: auto;
+        overflow: visible;
+        display: flex;
+        flex-direction: column;
       }
 
       .sticky-stage::after {
         display: none;
       }
 
-      /* Canvas plein format dans le bloc réduit */
+      /*
+       * Canvas sort du positionnement absolu pour occuper
+       * une hauteur CSS fixe en tête du flex column.
+       * resizeMain() lit mainCanvas.clientWidth/Height → dimensions exactes.
+       */
       #main-canvas {
-        position: absolute;
-        inset: 0;
+        position: static;
         width: 100%;
-        height: 100%;
+        height: 54vw;
+        min-height: 240px;
+        max-height: 46vh;
+        flex-shrink: 0;
+        display: block;
       }
 
-      /* Layer de messages : passe en flux vertical sous le canvas */
+      /* Layer de messages : flux sous le canvas, z-index neutralisé */
       .msg-layer {
         position: relative;
+        inset: auto;
+        z-index: auto;
         display: flex;
         flex-direction: column;
         align-items: stretch;
@@ -672,7 +686,7 @@
         pointer-events: auto;
       }
 
-      /* Chaque message : positionnement statique, affiché en bloc */
+      /* Chaque message empilé verticalement, sans chevauchement */
       .msg-step {
         position: static !important;
         opacity: 1 !important;
@@ -1076,10 +1090,10 @@
 
     /* ── Resize principale ─────────────────────────────── */
     function resizeMain() {
-      const p = mainCanvas.parentElement;
-      const w = p.clientWidth;
-      const h = p.clientHeight;
-      mainRenderer.setSize(w, h);
+      const w = mainCanvas.clientWidth;
+      const h = mainCanvas.clientHeight;
+      if (w === 0 || h === 0) return;
+      mainRenderer.setSize(w, h, false); /* false = ne pas écraser le CSS height */
       mainCamera.aspect = w / h;
       mainCamera.updateProjectionMatrix();
     }
