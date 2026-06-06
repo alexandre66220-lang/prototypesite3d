@@ -134,8 +134,8 @@
 
     @media (max-width: 767px) {
       .nav-links { display: none; }
-      .nav-logo  { position: static; transform: none; }
-      #navbar    { justify-content: center; }
+      .nav-logo  { position: static; transform: none; font-size: 1.2rem; letter-spacing: 0.35em; }
+      #navbar    { justify-content: space-between; padding: 0 1.4rem; }
     }
 
     /* ============================================================
@@ -720,6 +720,134 @@
         margin-top: 1.2rem;
         display: inline-block;
       }
+
+      /* --- Hamburger button (mobile only) --- */
+      #menu-btn {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        gap: 5px;
+        width: 36px;
+        height: 36px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        padding: 0;
+        z-index: 1002;
+        flex-shrink: 0;
+      }
+      #menu-btn span {
+        display: block;
+        width: 22px;
+        height: 1.5px;
+        background: var(--or);
+        border-radius: 1px;
+        transition: transform 0.35s var(--ease), opacity 0.35s;
+      }
+      #menu-btn.open span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+      #menu-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+      #menu-btn.open span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+      /* --- Overlay sombre --- */
+      #mobile-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0,0,0,0.7);
+        z-index: 1998;
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.4s var(--ease);
+      }
+      #mobile-overlay.open {
+        opacity: 1;
+        pointer-events: auto;
+      }
+
+      /* --- Drawer latéral --- */
+      #mobile-menu {
+        position: fixed;
+        top: 0;
+        right: 0;
+        height: 100%;
+        width: min(280px, 82vw);
+        background: var(--noir-2);
+        border-left: 1px solid rgba(201,168,76,0.18);
+        z-index: 1999;
+        display: flex;
+        flex-direction: column;
+        padding: 4.5rem 2rem 3rem;
+        transform: translateX(100%);
+        transition: transform 0.4s var(--ease);
+        box-shadow: -12px 0 40px rgba(0,0,0,0.55);
+      }
+      #mobile-menu.open {
+        transform: translateX(0);
+      }
+
+      /* Logo dans le drawer */
+      #mobile-menu-logo {
+        font-family: 'Cormorant Garamond', serif;
+        font-size: 1.05rem;
+        letter-spacing: 0.42em;
+        color: var(--or);
+        font-weight: 300;
+        display: block;
+        margin-bottom: 1.4rem;
+      }
+
+      /* Séparateur doré */
+      #mobile-menu-sep {
+        width: 28px;
+        height: 1px;
+        background: linear-gradient(90deg, var(--or), transparent);
+        margin-bottom: 2.4rem;
+        opacity: 0.55;
+      }
+
+      /* Liens du drawer */
+      #mobile-menu ul {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+      #mobile-menu ul a {
+        font-size: 0.68rem;
+        letter-spacing: 0.28em;
+        text-transform: uppercase;
+        color: rgba(250,248,242,0.55);
+        text-decoration: none;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 300;
+        transition: color 0.3s;
+        display: block;
+      }
+      #mobile-menu ul a:hover,
+      #mobile-menu ul a:active { color: var(--or); }
+
+      /* Bouton fermeture */
+      #menu-close {
+        position: absolute;
+        top: 1.4rem;
+        right: 1.4rem;
+        background: none;
+        border: none;
+        color: rgba(250,248,242,0.35);
+        font-size: 1.1rem;
+        cursor: pointer;
+        padding: 0.4rem;
+        line-height: 1;
+        transition: color 0.3s;
+      }
+      #menu-close:hover { color: var(--or); }
+    }
+
+    /* Hamburger et drawer masqués sur desktop */
+    @media (min-width: 768px) {
+      #menu-btn       { display: none !important; }
+      #mobile-overlay { display: none !important; }
+      #mobile-menu    { display: none !important; }
     }
   </style>
 </head>
@@ -747,6 +875,27 @@
     <a href="index.html" class="nav-logo">AURÉA</a>
 
     <ul class="nav-links">
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+
+    <!-- Bouton hamburger (mobile uniquement) -->
+    <button id="menu-btn" aria-label="Ouvrir le menu" aria-expanded="false">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
+  </nav>
+
+  <!-- Overlay et drawer mobile -->
+  <div id="mobile-overlay" aria-hidden="true"></div>
+  <nav id="mobile-menu" aria-label="Menu mobile" aria-hidden="true">
+    <button id="menu-close" aria-label="Fermer le menu">&#x2715;</button>
+    <span id="mobile-menu-logo">AURÉA</span>
+    <div id="mobile-menu-sep"></div>
+    <ul>
+      <li><a href="index.html">Accueil</a></li>
+      <li><a href="#savoir-faire">Services</a></li>
+      <li><a href="collection.html">À propos</a></li>
       <li><a href="contact.html">Contact</a></li>
     </ul>
   </nav>
@@ -1172,6 +1321,44 @@
       msgs.forEach(m => m.classList.add('active'));
       setInterval(() => { targetRotY += 0.008; }, 16);
     }
+
+    /* ── Hamburger / drawer mobile ───────────────────────── */
+    const menuBtn      = document.getElementById('menu-btn');
+    const mobileMenu   = document.getElementById('mobile-menu');
+    const mobileOverlay = document.getElementById('mobile-overlay');
+    const menuClose    = document.getElementById('menu-close');
+
+    function openDrawer() {
+      mobileMenu.classList.add('open');
+      mobileOverlay.classList.add('open');
+      menuBtn.classList.add('open');
+      menuBtn.setAttribute('aria-expanded', 'true');
+      mobileMenu.setAttribute('aria-hidden', 'false');
+      mobileOverlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeDrawer() {
+      mobileMenu.classList.remove('open');
+      mobileOverlay.classList.remove('open');
+      menuBtn.classList.remove('open');
+      menuBtn.setAttribute('aria-expanded', 'false');
+      mobileMenu.setAttribute('aria-hidden', 'true');
+      mobileOverlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+
+    if (menuBtn) {
+      menuBtn.addEventListener('click', () => {
+        menuBtn.classList.contains('open') ? closeDrawer() : openDrawer();
+      });
+    }
+    if (menuClose)     menuClose.addEventListener('click', closeDrawer);
+    if (mobileOverlay) mobileOverlay.addEventListener('click', closeDrawer);
+
+    document.querySelectorAll('#mobile-menu a').forEach(a => {
+      a.addEventListener('click', closeDrawer);
+    });
 
   })();
   </script>
